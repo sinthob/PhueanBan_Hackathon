@@ -1,0 +1,11 @@
+{
+  "expo": {
+    "name": "GoodNeighbor",
+    "slug": "goodneighbor-heartlink",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "plugins": ["expo-router"]
+  }
+}
