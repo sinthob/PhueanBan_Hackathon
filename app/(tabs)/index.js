@@ -4,13 +4,19 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 import ActivityCard from '../../components/ActivityCard';
 import { activities } from '../../data/mockData';
+import { WarmClearTheme } from '../../theme';
 
 export default function HomeScreen() {
   const nearbyActivities = activities.slice(0, 3);
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <LinearGradient colors={['#10b981', '#059669']} style={styles.header}>
+      <LinearGradient
+        colors={[WarmClearTheme.colors.primary, WarmClearTheme.colors.primaryDark]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.header}
+      >
         <Text style={styles.headerTitle}>กิจกรรมเด่นใกล้คุณ</Text>
         <Text style={styles.headerSubtitle}>คัดมาให้เฉพาะกิจกรรมยอดนิยมในละแวกนี้</Text>
       </LinearGradient>
@@ -31,7 +37,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9fafb',
+    backgroundColor: WarmClearTheme.colors.background,
   },
   content: {
     paddingBottom: 120,
@@ -40,18 +46,21 @@ const styles = StyleSheet.create({
     paddingTop: 48,
     paddingBottom: 24,
     paddingHorizontal: 20,
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
+    borderBottomLeftRadius: WarmClearTheme.radii.card,
+    borderBottomRightRadius: WarmClearTheme.radii.card,
+    ...WarmClearTheme.shadows.bar,
   },
   headerTitle: {
     fontSize: 24,
-    fontWeight: '700',
+    fontWeight: '900',
     color: '#ffffff',
     marginBottom: 6,
   },
   headerSubtitle: {
-    fontSize: 16,
+    fontSize: 18,
     color: 'rgba(255,255,255,0.9)',
+    fontWeight: '700',
+    lineHeight: 24,
   },
   section: {
     paddingHorizontal: 16,
@@ -65,12 +74,12 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: '700',
-    color: '#111827',
+    fontWeight: '900',
+    color: WarmClearTheme.colors.text,
   },
   sectionLink: {
     fontSize: 14,
-    color: '#10b981',
-    fontWeight: '600',
+    color: WarmClearTheme.colors.primary,
+    fontWeight: '900',
   },
 });

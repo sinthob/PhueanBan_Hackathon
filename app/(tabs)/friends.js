@@ -2,6 +2,7 @@ import React from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { friends } from '../../data/mockData';
+import { WarmClearTheme } from '../../theme';
 
 export default function FriendsScreen() {
   return (
@@ -39,7 +40,7 @@ export default function FriendsScreen() {
             </View>
             <View style={styles.statItem}>
               <Text style={styles.statValue}>{friend.streak}</Text>
-              <Text style={styles.statLabel}>วันติดต่อกัน</Text>
+              <Text style={styles.statLabel}>สถิติการเจอกัน</Text>
             </View>
           </View>
         </View>
@@ -51,7 +52,7 @@ export default function FriendsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9fafb',
+    backgroundColor: WarmClearTheme.colors.background,
   },
   content: {
     paddingHorizontal: 16,
@@ -62,25 +63,25 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   title: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: '#111827',
+    fontSize: 26,
+    fontWeight: '900',
+    color: WarmClearTheme.colors.text,
     marginBottom: 6,
   },
   subtitle: {
-    fontSize: 15,
-    color: '#6b7280',
+    fontSize: 18,
+    color: WarmClearTheme.colors.textSub,
+    fontWeight: '700',
+    lineHeight: 24,
   },
   card: {
-    backgroundColor: '#ffffff',
-    borderRadius: 16,
+    backgroundColor: WarmClearTheme.colors.surface,
+    borderRadius: WarmClearTheme.radii.card,
     padding: 16,
     marginBottom: 14,
-    shadowColor: '#000000',
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 3 },
-    elevation: 2,
+    borderWidth: 1,
+    borderColor: WarmClearTheme.colors.border,
+    ...WarmClearTheme.shadows.card,
   },
   cardRow: {
     flexDirection: 'row',
@@ -102,10 +103,10 @@ const styles = StyleSheet.create({
     height: 12,
     borderRadius: 6,
     borderWidth: 2,
-    borderColor: '#ffffff',
+    borderColor: WarmClearTheme.colors.surface,
   },
   statusOnline: {
-    backgroundColor: '#10b981',
+    backgroundColor: WarmClearTheme.colors.primary,
   },
   statusOffline: {
     backgroundColor: '#9ca3af',
@@ -114,25 +115,30 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   name: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#111827',
+    fontSize: 20,
+    fontWeight: '900',
+    color: WarmClearTheme.colors.text,
     marginBottom: 4,
   },
   meta: {
-    fontSize: 13,
-    color: '#6b7280',
+    fontSize: 16,
+    color: WarmClearTheme.colors.textSub,
+    fontWeight: '700',
   },
   distancePill: {
-    backgroundColor: '#f0fdf4',
+    backgroundColor: WarmClearTheme.colors.primarySoft,
     borderRadius: 999,
     paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingVertical: 8,
+    minHeight: 40,
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: WarmClearTheme.colors.primarySoftBorder,
   },
   distanceText: {
-    fontSize: 12,
-    color: '#059669',
-    fontWeight: '600',
+    fontSize: 16,
+    color: WarmClearTheme.colors.primaryDark,
+    fontWeight: '900',
   },
   statsRow: {
     flexDirection: 'row',
@@ -140,19 +146,23 @@ const styles = StyleSheet.create({
   },
   statItem: {
     flex: 1,
-    backgroundColor: '#f9fafb',
-    borderRadius: 12,
+    backgroundColor: WarmClearTheme.colors.surfaceSoft,
+    borderRadius: WarmClearTheme.radii.control,
     paddingVertical: 10,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: WarmClearTheme.colors.border,
+    ...WarmClearTheme.shadows.subtle,
   },
   statValue: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#111827',
+    fontSize: 20,
+    fontWeight: '900',
+    color: WarmClearTheme.colors.text,
   },
   statLabel: {
-    fontSize: 12,
-    color: '#6b7280',
+    fontSize: 16,
+    color: WarmClearTheme.colors.textSub,
     marginTop: 2,
+    fontWeight: '800',
   },
 });
