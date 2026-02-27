@@ -1,0 +1,30 @@
+# Supabase setup (Auth + Postgres)
+
+## 1) Env vars (Expo)
+
+- Copy `.env.example` to `.env`
+- Fill values from Supabase Dashboard → Project Settings → API
+  - `EXPO_PUBLIC_SUPABASE_URL`
+  - `EXPO_PUBLIC_SUPABASE_ANON_KEY`
+
+## 2) Database schema + RLS
+
+- Open Supabase Dashboard → SQL Editor
+- Run [schema.sql](schema.sql)
+
+This creates:
+
+- `public.profiles` with `role = elder | caregiver`
+- `public.caregiver_elder_links` for caregiver↔elder assignment (future use)
+
+## 3) App auth flow
+
+- Unauthenticated → redirects to `/(auth)/login`
+- Signed in but no profile role → redirects to `/(onboarding)/role`
+- Role `elder` → redirects to `/(tabs)`
+- Role `caregiver` → redirects to `/caregiver`
+
+## Notes
+
+- Authorization must be enforced by Postgres RLS policies (not only in the app UI).
+- If you see `permission denied` errors when loading profiles, re-check that RLS is enabled and policies exist.
