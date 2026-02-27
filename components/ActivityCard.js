@@ -20,7 +20,7 @@ export default function ActivityCard({ activity, onJoin }) {
   return (
     <View style={styles.card}>
       <LinearGradient
-        colors={[t.colors.primarySoft, t.colors.surface]}
+        colors={[t.colors.cardGradientStart, t.colors.cardGradientEnd]}
         style={styles.hero}
       >
         <Text style={styles.heroIcon}>{activity.icon}</Text>
@@ -136,11 +136,11 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   keyInfoBox: {
-    backgroundColor: WarmClearTheme.colors.surfaceSoft,
+    backgroundColor: WarmClearTheme.colors.primarySoft,
     borderRadius: WarmClearTheme.radii.control,
     padding: 12,
     borderWidth: 1,
-    borderColor: WarmClearTheme.colors.border,
+    borderColor: WarmClearTheme.colors.primarySoftBorder,
     ...WarmClearTheme.shadows.subtle,
     marginBottom: 12,
   },
@@ -223,9 +223,9 @@ const styles = StyleSheet.create({
     color: WarmClearTheme.colors.text,
   },
   joinButton: {
-    backgroundColor: WarmClearTheme.colors.primary,
+    backgroundColor: WarmClearTheme.colors.accent,
     borderRadius: WarmClearTheme.radii.control,
-    minHeight: 48,
+    minHeight: 52,
     paddingVertical: 14,
     alignItems: 'center',
     justifyContent: 'center',
@@ -234,6 +234,6 @@ const styles = StyleSheet.create({
   joinButtonText: {
     fontSize: 18,
     fontWeight: '900',
-    color: '#ffffff',
+    color: WarmClearTheme.colors.accentText,
   },
 });

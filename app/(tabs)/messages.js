@@ -410,7 +410,7 @@ const styles = StyleSheet.create({
   },
   modeChipActive: {
     backgroundColor: WarmClearTheme.colors.primarySoft,
-    borderColor: WarmClearTheme.colors.primarySoftBorder,
+    borderColor: WarmClearTheme.colors.primary,
   },
   modeChipText: {
     fontSize: 14,

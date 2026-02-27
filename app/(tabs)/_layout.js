@@ -35,7 +35,9 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarLabelStyle: { fontSize: 14 },
+        tabBarActiveTintColor: WarmClearTheme.colors.tabBarIcon,
+        tabBarInactiveTintColor: WarmClearTheme.colors.tabBarIconInactive,
+        tabBarLabelStyle: { fontSize: 12, fontWeight: '800' },
         tabBarStyle: styles.tabBar,
       }}>
       <Tabs.Screen
@@ -97,8 +99,8 @@ const styles = StyleSheet.create({
     height: 78,
     paddingTop: 8,
     paddingBottom: 12,
-    backgroundColor: WarmClearTheme.colors.surface,
-    borderTopColor: WarmClearTheme.colors.border,
+    backgroundColor: WarmClearTheme.colors.tabBar,
+    borderTopWidth: 0,
     ...WarmClearTheme.shadows.bar,
   },
   createButtonContainer: {
@@ -110,14 +112,14 @@ const styles = StyleSheet.create({
     width: 54,
     height: 54,
     borderRadius: 999,
-    backgroundColor: WarmClearTheme.colors.primary,
+    backgroundColor: WarmClearTheme.colors.tabBarIcon,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 4,
     ...WarmClearTheme.shadows.button,
   },
   createButtonCircleFocused: {
-    backgroundColor: WarmClearTheme.colors.primaryDark,
+    backgroundColor: '#C04010',
   },
   createButtonLabel: {
     fontSize: 12,

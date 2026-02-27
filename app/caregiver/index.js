@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 
 import { currentUser } from '../../data/mockData';
 import { caregiverUser, monitoringSnapshot } from '../../data/caregiverMock';
@@ -10,25 +10,25 @@ import { WarmClearTheme } from '../../theme';
 function levelStyle(level) {
   if (level === 'ok') {
     return {
-      bg: WarmClearTheme.colors.primarySoft,
-      border: WarmClearTheme.colors.primarySoftBorder,
-      text: WarmClearTheme.colors.primaryDark,
-      dot: WarmClearTheme.colors.primary,
+      bg: '#C8EEE9',  // teal อ่อนตามภาพ
+      border: '#9DE8DF',
+      text: '#1FA090',
+      dot: '#2ABFAC',
     };
   }
   if (level === 'watch') {
     return {
-      bg: WarmClearTheme.colors.warningSoft,
-      border: WarmClearTheme.colors.warningSoftBorder,
-      text: WarmClearTheme.colors.warningText,
-      dot: WarmClearTheme.colors.warning,
+      bg: '#FFF3CD',  // yellow อ่อน
+      border: '#FDE68A',
+      text: '#92400E',
+      dot: '#F59E0B',
     };
   }
   return {
-    bg: WarmClearTheme.colors.dangerSoft,
-    border: WarmClearTheme.colors.dangerSoftBorder,
-    text: WarmClearTheme.colors.dangerText,
-    dot: WarmClearTheme.colors.danger,
+    bg: '#FFE5E5',  // red อ่อน
+    border: '#FED7D7',
+    text: '#C53030',
+    dot: '#E05A1E',
   };
 }
 
@@ -40,43 +40,48 @@ export default function CaregiverDashboardScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <LinearGradient
-        colors={[WarmClearTheme.colors.primary, WarmClearTheme.colors.primaryDark]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.header}
-      >
+      {/* Header - ขาวตามภาพ */}
+      <View style={styles.header}>
         <View style={styles.headerTopRow}>
-          <View>
-            <Text style={styles.headerTitle}>โหมดลูกหลาน/ผู้ดูแล</Text>
-            <Text style={styles.headerSubtitle}>ดูข้อมูลจำเป็นแบบเคารพความเป็นส่วนตัว (mock)</Text>
+          <View style={styles.headerLeft}>
+            <View style={styles.avatar}>
+              <Text style={styles.avatarText}>{caregiverUser.avatar}</Text>
+            </View>
+            <View>
+              <Text style={styles.welcomeText}>โหมดผู้ดูแล</Text>
+              <Text style={styles.userName}>{caregiverUser.name}</Text>
+            </View>
           </View>
-          <Pressable
-            onPress={async () => {
-              try {
-                await signOut();
-              } catch (err) {
-                Alert.alert('ออกจากระบบไม่สำเร็จ', err?.message ?? 'กรุณาลองใหม่');
-              }
-            }}
-            style={styles.switchButton}
-          >
-            <Text style={styles.switchButtonText}>ออกจากระบบ</Text>
+          <Pressable style={styles.notificationButton}>
+            <Ionicons name="notifications" size={24} color={WarmClearTheme.colors.text} />
           </Pressable>
         </View>
 
+        {/* Who is who */}
         <View style={styles.whoRow}>
           <View style={styles.whoCard}>
-            <Text style={styles.whoLabel}>ผู้ดูแล</Text>
-            <Text style={styles.whoValue}>{caregiverUser.avatar} {caregiverUser.name}</Text>
-          </View>
-          <View style={styles.whoCard}>
-            <Text style={styles.whoLabel}>ผู้สูงอายุ</Text>
+            <Text style={styles.whoLabel}>ผู้สูงอายุที่ดูแล</Text>
             <Text style={styles.whoValue}>{currentUser.avatar} {currentUser.name}</Text>
           </View>
         </View>
-      </LinearGradient>
 
+        {/* Logout button */}
+        <Pressable
+          onPress={async () => {
+            try {
+              await signOut();
+            } catch (err) {
+              Alert.alert('ออกจากระบบไม่สำเร็จ', err?.message ?? 'กรุณาลองใหม่');
+            }
+          }}
+          style={styles.logoutButton}
+        >
+          <Ionicons name="log-out-outline" size={20} color={WarmClearTheme.colors.text} />
+          <Text style={styles.logoutButtonText}>ออกจากระบบ</Text>
+        </Pressable>
+      </View>
+
+      {/* Privacy Card */}
       <View style={styles.card}>
         <View style={styles.cardHeaderRow}>
           <Text style={styles.cardTitle}>ความเป็นส่วนตัวและขอบเขตข้อมูล</Text>
@@ -98,10 +103,19 @@ export default function CaregiverDashboardScreen() {
         ) : null}
       </View>
 
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>ล่าสุดออกไปไหน (แบบคร่าวๆ)</Text>
-        <Text style={styles.cardBody}>
-          {monitoringSnapshot.lastKnown.label} • {monitoringSnapshot.lastKnown.district}
+      {/* Location Card - ใช้สี teal อ่อน */}
+      <View style={[styles.card, styles.locationCard]}>
+        <View style={styles.cardIconRow}>
+          <View style={styles.cardIcon}>
+            <Ionicons name="location" size={24} color="#2ABFAC" />
+          </View>
+          <Text style={styles.cardTitle}>ล่าสุดออกไปไหน (แบบคร่าวๆ)</Text>
+        </View>
+        <Text style={styles.cardBodyLarge}>
+          {monitoringSnapshot.lastKnown.label}
+        </Text>
+        <Text style={styles.cardBodySub}>
+          {monitoringSnapshot.lastKnown.district}
         </Text>
         <View style={styles.metaRow}>
           <View style={styles.metaPill}>
@@ -120,8 +134,14 @@ export default function CaregiverDashboardScreen() {
         </Pressable>
       </View>
 
+      {/* Activity Trend Card */}
       <View style={styles.card}>
-        <Text style={styles.cardTitle}>ช่วงนี้ออกไปข้างนอกทำกิจกรรมแค่ไหน?</Text>
+        <View style={styles.cardIconRow}>
+          <View style={styles.cardIcon}>
+            <Ionicons name="trending-up" size={24} color="#2ABFAC" />
+          </View>
+          <Text style={styles.cardTitle}>ช่วงนี้ออกไปข้างนอกทำกิจกรรมแค่ไหน?</Text>
+        </View>
         <View style={styles.statGrid}>
           <View style={styles.statItem}>
             <Text style={styles.statValue}>{monitoringSnapshot.activityTrend.last7Days.joinedActivities}</Text>
@@ -145,10 +165,16 @@ export default function CaregiverDashboardScreen() {
         </Text>
       </View>
 
+      {/* Safety Signals Card */}
       <View style={styles.card}>
-        <Text style={styles.cardTitle}>สัญญาณเพื่อความปลอดภัย</Text>
+        <View style={styles.cardIconRow}>
+          <View style={styles.cardIcon}>
+            <Ionicons name="shield-checkmark" size={24} color="#2ABFAC" />
+          </View>
+          <Text style={styles.cardTitle}>สัญญาณเพื่อความปลอดภัย</Text>
+        </View>
         <Text style={styles.cardBody}>
-          AI/ระบบจะแสดงเป็น “สัญญาณรวม” เพื่อช่วยสังเกต ไม่ใช่ข้อสรุปทางการแพทย์ (mock)
+          AI/ระบบจะแสดงเป็น "สัญญาณรวม" เพื่อช่วยสังเกต ไม่ใช่ข้อสรุปทางการแพทย์
         </Text>
 
         <View style={styles.signalList}>
@@ -167,22 +193,30 @@ export default function CaregiverDashboardScreen() {
         </View>
       </View>
 
+      {/* Emergency Contact Card */}
       <View style={styles.card}>
-        <Text style={styles.cardTitle}>ติดต่อด่วน (mock)</Text>
+        <View style={styles.cardIconRow}>
+          <View style={styles.cardIcon}>
+            <Ionicons name="call" size={24} color="#E05A1E" />
+          </View>
+          <Text style={styles.cardTitle}>ติดต่อด่วน</Text>
+        </View>
         <Text style={styles.cardBody}>
           แนะนำให้ผู้สูงอายุยินยอมก่อนแชร์เบอร์/ช่องทางติดต่อ และใช้เมื่อจำเป็น
         </Text>
         <View style={styles.actionRow}>
           <Pressable
-            onPress={() => Alert.alert('โทร (mock)', monitoringSnapshot.quickContacts[0].value)}
+            onPress={() => Alert.alert('โทร', monitoringSnapshot.quickContacts[0].value)}
             style={styles.primaryButton}
           >
+            <Ionicons name="call-outline" size={20} color="#ffffff" />
             <Text style={styles.primaryButtonText}>โทรหาผู้สูงอายุ</Text>
           </Pressable>
           <Pressable
-            onPress={() => Alert.alert('โทรฉุกเฉิน (mock)', monitoringSnapshot.quickContacts[1].value)}
+            onPress={() => Alert.alert('โทรฉุกเฉิน', monitoringSnapshot.quickContacts[1].value)}
             style={styles.dangerButton}
           >
+            <Ionicons name="medical" size={20} color="#ffffff" />
             <Text style={styles.dangerButtonText}>โทร 1669</Text>
           </Pressable>
         </View>
@@ -197,125 +231,176 @@ const styles = StyleSheet.create({
     backgroundColor: WarmClearTheme.colors.background,
   },
   content: {
-    paddingBottom: 120,
+    paddingBottom: 100,
   },
+
+  // Header - ขาว
   header: {
-    paddingTop: 52,
-    paddingBottom: 18,
-    paddingHorizontal: 16,
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
-    ...WarmClearTheme.shadows.bar,
+    backgroundColor: '#FFFFFF',
+    paddingTop: 48,
+    paddingBottom: 20,
+    paddingHorizontal: 20,
   },
   headerTopRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    gap: 12,
-    marginBottom: 14,
+    alignItems: 'center',
+    marginBottom: 16,
   },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: '900',
-    color: '#ffffff',
-    marginBottom: 4,
-  },
-  headerSubtitle: {
-    fontSize: 16,
-    fontWeight: '800',
-    color: 'rgba(255,255,255,0.92)',
-    lineHeight: 22,
-  },
-  switchButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    minHeight: 48,
-    justifyContent: 'center',
-    borderRadius: WarmClearTheme.radii.control,
-    backgroundColor: 'rgba(255,255,255,0.18)',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.28)',
-  },
-  switchButtonText: {
-    fontSize: 14,
-    fontWeight: '900',
-    color: '#ffffff',
-  },
-  whoRow: {
+  headerLeft: {
     flexDirection: 'row',
-    gap: 10,
+    alignItems: 'center',
+    gap: 12,
+  },
+  avatar: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#FFD84D',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarText: {
+    fontSize: 32,
+  },
+  welcomeText: {
+    fontSize: 16,
+    color: WarmClearTheme.colors.textMuted,
+    fontWeight: '700',
+  },
+  userName: {
+    fontSize: 20,
+    color: WarmClearTheme.colors.text,
+    fontWeight: '900',
+  },
+  notificationButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: WarmClearTheme.colors.surfaceSoft,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  // Who row
+  whoRow: {
+    marginBottom: 16,
   },
   whoCard: {
-    flex: 1,
-    backgroundColor: 'rgba(255,255,255,0.16)',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.25)',
-    borderRadius: WarmClearTheme.radii.control,
-    padding: 12,
+    backgroundColor: '#C8EEE9',  // teal อ่อน
+    borderRadius: 16,
+    padding: 14,
   },
   whoLabel: {
     fontSize: 14,
     fontWeight: '800',
-    color: 'rgba(255,255,255,0.88)',
+    color: WarmClearTheme.colors.textMuted,
     marginBottom: 6,
   },
   whoValue: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: WarmClearTheme.colors.text,
+  },
+
+  // Logout button
+  logoutButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: WarmClearTheme.colors.surfaceSoft,
+    borderRadius: 16,
+    paddingVertical: 12,
+    borderWidth: 1,
+    borderColor: WarmClearTheme.colors.border,
+  },
+  logoutButtonText: {
     fontSize: 16,
     fontWeight: '900',
-    color: '#ffffff',
+    color: WarmClearTheme.colors.text,
   },
+
+  // Cards
   card: {
     marginTop: 14,
     marginHorizontal: 16,
     backgroundColor: WarmClearTheme.colors.surface,
-    borderRadius: WarmClearTheme.radii.card,
+    borderRadius: 20,
     padding: 16,
     borderWidth: 1,
     borderColor: WarmClearTheme.colors.border,
     ...WarmClearTheme.shadows.card,
   },
+  locationCard: {
+    backgroundColor: '#C8EEE9',  // teal อ่อนตามภาพ
+  },
   cardHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     gap: 10,
+    marginBottom: 8,
+  },
+  cardIconRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 12,
+  },
+  cardIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: 'rgba(42, 191, 172, 0.15)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   cardTitle: {
+    flex: 1,
     fontSize: 18,
     fontWeight: '900',
     color: WarmClearTheme.colors.text,
   },
   cardBody: {
-    marginTop: 8,
     fontSize: 16,
-    fontWeight: '800',
-    color: WarmClearTheme.colors.textMuted,
+    fontWeight: '700',
+    color: WarmClearTheme.colors.textSub,
     lineHeight: 22,
+  },
+  cardBodyLarge: {
+    fontSize: 20,
+    fontWeight: '900',
+    color: WarmClearTheme.colors.text,
+    marginBottom: 4,
+  },
+  cardBodySub: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: WarmClearTheme.colors.textSub,
   },
   linkButton: {
     paddingHorizontal: 12,
     paddingVertical: 8,
-    minHeight: 48,
-    justifyContent: 'center',
-    borderRadius: WarmClearTheme.radii.control,
+    borderRadius: 12,
     backgroundColor: WarmClearTheme.colors.primarySoft,
     borderWidth: 1,
     borderColor: WarmClearTheme.colors.primarySoftBorder,
-    ...WarmClearTheme.shadows.subtle,
   },
   linkButtonText: {
     fontSize: 14,
     fontWeight: '900',
     color: WarmClearTheme.colors.primaryDark,
   },
+
+  // Scope box
   scopeBox: {
     marginTop: 12,
     backgroundColor: WarmClearTheme.colors.surfaceSoft,
-    borderRadius: WarmClearTheme.radii.card,
+    borderRadius: 16,
     padding: 12,
     borderWidth: 1,
     borderColor: WarmClearTheme.colors.border,
-    ...WarmClearTheme.shadows.subtle,
   },
   scopeTitle: {
     fontSize: 16,
@@ -325,105 +410,99 @@ const styles = StyleSheet.create({
   },
   scopeItem: {
     fontSize: 16,
-    fontWeight: '800',
+    fontWeight: '700',
     color: WarmClearTheme.colors.textSub,
     lineHeight: 22,
   },
   scopeMeta: {
     marginTop: 10,
     fontSize: 14,
-    fontWeight: '800',
-    color: WarmClearTheme.colors.textSub,
+    fontWeight: '700',
+    color: WarmClearTheme.colors.textMuted,
   },
+
+  // Meta pills
   metaRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 8,
-    marginTop: 10,
+    marginTop: 12,
     marginBottom: 12,
   },
   metaPill: {
-    backgroundColor: WarmClearTheme.colors.primarySoft,
+    backgroundColor: 'rgba(42, 191, 172, 0.2)',
     borderRadius: 999,
     paddingHorizontal: 10,
     paddingVertical: 6,
-    borderWidth: 1,
-    borderColor: WarmClearTheme.colors.primarySoftBorder,
-    ...WarmClearTheme.shadows.subtle,
   },
   metaText: {
     fontSize: 14,
     fontWeight: '900',
-    color: WarmClearTheme.colors.primaryDark,
+    color: '#1FA090',
   },
   metaPillMuted: {
-    backgroundColor: WarmClearTheme.colors.surfaceSoft,
+    backgroundColor: 'rgba(0,0,0,0.05)',
     borderRadius: 999,
     paddingHorizontal: 10,
     paddingVertical: 6,
-    borderWidth: 1,
-    borderColor: WarmClearTheme.colors.border,
-    ...WarmClearTheme.shadows.subtle,
   },
   metaMutedText: {
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '700',
     color: WarmClearTheme.colors.textSub,
   },
+
+  // Buttons
   secondaryButton: {
-    backgroundColor: WarmClearTheme.colors.surface,
-    borderRadius: WarmClearTheme.radii.control,
+    backgroundColor: 'rgba(255,255,255,0.7)',
+    borderRadius: 16,
     paddingVertical: 12,
-    minHeight: 48,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: WarmClearTheme.colors.border,
-    justifyContent: 'center',
-    ...WarmClearTheme.shadows.subtle,
+    borderColor: 'rgba(0,0,0,0.1)',
   },
   secondaryButtonText: {
     fontSize: 16,
     fontWeight: '900',
     color: WarmClearTheme.colors.text,
   },
+
+  // Stats grid
   statGrid: {
     marginTop: 12,
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 10,
-    backgroundColor: WarmClearTheme.colors.surfaceSoft,
-    borderRadius: WarmClearTheme.radii.card,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: WarmClearTheme.colors.border,
   },
   statItem: {
     width: '48%',
-    backgroundColor: WarmClearTheme.colors.surface,
-    borderRadius: WarmClearTheme.radii.card,
-    paddingVertical: 12,
+    backgroundColor: '#C8EEE9',
+    borderRadius: 16,
+    paddingVertical: 16,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: WarmClearTheme.colors.border,
-    ...WarmClearTheme.shadows.subtle,
+    borderColor: '#9DE8DF',
   },
   statValue: {
-    fontSize: 18,
+    fontSize: 28,
     fontWeight: '900',
-    color: WarmClearTheme.colors.primary,
+    color: '#1FA090',
   },
   statLabel: {
     marginTop: 4,
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '800',
     color: WarmClearTheme.colors.textSub,
+    textAlign: 'center',
   },
   helperText: {
     marginTop: 10,
     fontSize: 14,
-    fontWeight: '800',
-    color: WarmClearTheme.colors.textSub,
+    fontWeight: '700',
+    color: WarmClearTheme.colors.textMuted,
   },
+
+  // Signals
   signalList: {
     marginTop: 12,
     gap: 10,
@@ -431,10 +510,9 @@ const styles = StyleSheet.create({
   signalItem: {
     flexDirection: 'row',
     gap: 10,
-    borderRadius: WarmClearTheme.radii.card,
+    borderRadius: 16,
     padding: 12,
     borderWidth: 1,
-    ...WarmClearTheme.shadows.subtle,
   },
   signalDot: {
     width: 10,
@@ -449,10 +527,12 @@ const styles = StyleSheet.create({
   },
   signalDetail: {
     fontSize: 14,
-    fontWeight: '800',
+    fontWeight: '700',
     color: WarmClearTheme.colors.textSub,
     lineHeight: 20,
   },
+
+  // Action buttons
   actionRow: {
     marginTop: 12,
     flexDirection: 'row',
@@ -460,12 +540,13 @@ const styles = StyleSheet.create({
   },
   primaryButton: {
     flex: 1,
-    backgroundColor: WarmClearTheme.colors.primary,
-    borderRadius: WarmClearTheme.radii.control,
-    paddingVertical: 12,
-    minHeight: 48,
+    backgroundColor: '#2ABFAC',
+    borderRadius: 16,
+    paddingVertical: 14,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    gap: 8,
     ...WarmClearTheme.shadows.button,
   },
   primaryButtonText: {
@@ -474,13 +555,14 @@ const styles = StyleSheet.create({
     color: '#ffffff',
   },
   dangerButton: {
-    paddingHorizontal: 14,
-    backgroundColor: WarmClearTheme.colors.danger,
-    borderRadius: WarmClearTheme.radii.control,
-    paddingVertical: 12,
-    minHeight: 48,
+    paddingHorizontal: 16,
+    backgroundColor: '#E05A1E',
+    borderRadius: 16,
+    paddingVertical: 14,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    gap: 8,
     ...WarmClearTheme.shadows.button,
   },
   dangerButtonText: {

@@ -244,7 +244,7 @@ const styles = StyleSheet.create({
   },
   categoryChipActive: {
     backgroundColor: WarmClearTheme.colors.primarySoft,
-    borderColor: WarmClearTheme.colors.primarySoftBorder,
+    borderColor: WarmClearTheme.colors.primary,
   },
   categoryChipText: {
     fontSize: 14,
