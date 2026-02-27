@@ -14,11 +14,6 @@ import ActivityCard from '../../components/ActivityCard';
 import { activities, categories } from '../../data/mockData';
 import { WarmClearTheme } from '../../theme';
 
-import {
-  trackCheckinSuccess,
-  trackActivityJoined,
-} from '../../loneliness/loneliness';
-
 export default function HomeScreen() {
   const [searchText, setSearchText] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -50,17 +45,8 @@ export default function HomeScreen() {
         end={{ x: 1, y: 1 }}
         style={styles.header}
       >
-        <Text style={styles.headerTitle}>สวัสดี วันนี้เป็นอย่างไรบ้าง?</Text>
-        <Text style={styles.headerSubtitle}>กิจกรรมเด่นใกล้คุณ คัดมาเฉพาะละแวกนี้</Text>
-
-        <Pressable
-          onPress={handleCheckin}
-          style={[styles.checkinBtn, checkedIn && styles.checkinBtnDone]}
-        >
-          <Text style={styles.checkinBtnText}>
-            {checkedIn ? 'เช็คอินแล้ว' : 'เช็คอินวันนี้'}
-          </Text>
-        </Pressable>
+        <Text style={styles.headerTitle}>กิจกรรมเด่นใกล้คุณ</Text>
+        <Text style={styles.headerSubtitle}>คัดมาให้เฉพาะกิจกรรมยอดนิยมในละแวกนี้</Text>
       </LinearGradient>
 
       <View style={styles.searchWrap}>
@@ -112,9 +98,16 @@ export default function HomeScreen() {
           <Text style={styles.sectionTitle}>{showFiltered ? 'ผลการค้นหา' : 'กิจกรรมเด่นใกล้คุณ'}</Text>
           {!showFiltered ? <Text style={styles.sectionLink}>ดูทั้งหมด</Text> : null}
         </View>
-        {nearbyActivities.map((activity) => (
-          <ActivityCard key={activity.id} activity={activity} onJoin={handleJoin} />
-        ))}
+        {visibleActivities.length ? (
+          visibleActivities.map((activity) => (
+            <ActivityCard key={activity.id} activity={activity} onJoin={() => {}} />
+          ))
+        ) : (
+          <View style={styles.emptyCard}>
+            <Text style={styles.emptyTitle}>ไม่พบกิจกรรม</Text>
+            <Text style={styles.emptyBody}>ลองเปลี่ยนคำค้นหรือเลือกหมวดหมู่อื่น</Text>
+          </View>
+        )}
       </View>
     </ScrollView>
   );
@@ -135,37 +128,18 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: WarmClearTheme.radii.card,
     borderBottomRightRadius: WarmClearTheme.radii.card,
     ...WarmClearTheme.shadows.bar,
-    gap: 6,
   },
   headerTitle: {
     fontSize: 24,
     fontWeight: '900',
     color: '#ffffff',
-    marginBottom: 4,
+    marginBottom: 6,
   },
   headerSubtitle: {
-    fontSize: 16,
-    color: 'rgba(255,255,255,0.85)',
+    fontSize: 18,
+    color: 'rgba(255,255,255,0.9)',
     fontWeight: '700',
-    lineHeight: 22,
-  },
-  checkinBtn: {
-    marginTop: 14,
-    backgroundColor: 'rgba(255,255,255,0.20)',
-    borderRadius: WarmClearTheme.radii.control,
-    paddingVertical: 14,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.35)',
-  },
-  checkinBtnDone: {
-    backgroundColor: 'rgba(255,255,255,0.10)',
-    borderColor: 'rgba(255,255,255,0.20)',
-  },
-  checkinBtnText: {
-    fontSize: 17,
-    fontWeight: '900',
-    color: '#ffffff',
+    lineHeight: 24,
   },
   section: {
     paddingHorizontal: 16,
