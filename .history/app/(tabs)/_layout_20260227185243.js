@@ -39,12 +39,6 @@ export default function TabLayout() {
         tabBarStyle: styles.tabBar,
       }}>
       <Tabs.Screen
-        name="discover"
-        options={{
-          href: null,
-        }}
-      />
-      <Tabs.Screen
         name="index"
         options={{
           title: 'กิจกรรม',
@@ -54,11 +48,11 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="messages"
+        name="discover"
         options={{
-          title: 'ข้อความ',
+          title: 'ค้นหา',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="chatbubbles" size={size ?? 22} color={color} />
+            <Ionicons name="search" size={size ?? 22} color={color} />
           ),
         }}
       />

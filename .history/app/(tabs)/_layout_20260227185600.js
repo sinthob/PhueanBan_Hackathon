@@ -39,12 +39,6 @@ export default function TabLayout() {
         tabBarStyle: styles.tabBar,
       }}>
       <Tabs.Screen
-        name="discover"
-        options={{
-          href: null,
-        }}
-      />
-      <Tabs.Screen
         name="index"
         options={{
           title: 'กิจกรรม',
