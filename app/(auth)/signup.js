@@ -3,7 +3,7 @@ import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 
 import { LinearGradient } from 'expo-linear-gradient';
 import { Link } from 'expo-router';
 
-import { useAuth } from '../../providers/AuthProvider';
+import { useAuth } from '../../providers/providers';
 import { WarmClearTheme } from '../../theme';
 
 export default function SignupScreen() {
@@ -11,17 +11,29 @@ export default function SignupScreen() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   const onSignup = async () => {
     const trimmedEmail = email.trim();
-    if (!trimmedEmail || !password) {
-      Alert.alert('กรอกข้อมูลไม่ครบ', 'กรุณากรอกอีเมลและรหัสผ่าน');
+    if (!trimmedEmail || !password || !confirmPassword) {
+      Alert.alert('กรอกข้อมูลไม่ครบ', 'กรุณากรอกข้อมูลให้ครบทุกช่อง');
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmedEmail)) {
+      Alert.alert('อีเมลไม่ถูกต้อง', 'กรุณากรอกอีเมลในรูปแบบที่ถูกต้อง');
       return;
     }
 
     if (password.length < 8) {
-      Alert.alert('รหัสผ่านสั้นเกินไป', 'แนะนำอย่างน้อย 8 ตัวอักษร');
+      Alert.alert('รหัสผ่านสั้นเกินไป', 'รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      Alert.alert('รหัสผ่านไม่ตรงกัน', 'กรุณากรอกรหัสผ่านให้ตรงกันทั้งสองช่อง');
       return;
     }
 
@@ -72,6 +84,16 @@ export default function SignupScreen() {
           onChangeText={setPassword}
           secureTextEntry
           placeholder="อย่างน้อย 8 ตัวอักษร"
+          placeholderTextColor={WarmClearTheme.colors.textMuted}
+          style={styles.input}
+        />
+
+        <Text style={[styles.label, { marginTop: 12 }]}>ยืนยันรหัสผ่าน</Text>
+        <TextInput
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
+          secureTextEntry
+          placeholder="กรอกรหัสผ่านอีกครั้ง"
           placeholderTextColor={WarmClearTheme.colors.textMuted}
           style={styles.input}
         />

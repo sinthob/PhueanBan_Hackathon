@@ -1,9 +1,16 @@
+/**
+ * app/_layout.js  (Root Layout)
+ *
+ * แก้ import จาก providers/AuthProvider + providers/LonelinessProvider
+ * → providers/providers (ไฟล์รวม)
+ */
+
 import React, { useEffect } from 'react';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 
-import { AuthProvider, useAuth } from '../providers/AuthProvider';
+import { AuthProvider, useAuth, LonelinessProvider } from '../providers/providers';
 
 function RouteGuard() {
   const router = useRouter();
@@ -57,15 +64,17 @@ function RouteGuard() {
 export default function RootLayout() {
   return (
     <AuthProvider>
-      <RouteGuard />
-      <Stack initialRouteName="index">
-        <Stack.Screen name="index" options={{ headerShown: false }} />
-        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-        <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="caregiver" options={{ headerShown: false }} />
-      </Stack>
-      <StatusBar style="dark" />
+      <LonelinessProvider>
+        <RouteGuard />
+        <Stack>
+          <Stack.Screen name="index" options={{ headerShown: false }} />
+          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+          <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="caregiver" options={{ headerShown: false }} />
+        </Stack>
+        <StatusBar style="dark" />
+      </LonelinessProvider>
     </AuthProvider>
   );
 }

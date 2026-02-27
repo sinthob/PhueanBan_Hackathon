@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
-import { useAuth } from '../../providers/AuthProvider';
+import { useAuth } from '../../providers/providers';
 import { WarmClearTheme } from '../../theme';
 
 export default function RoleOnboardingScreen() {
@@ -22,11 +22,24 @@ export default function RoleOnboardingScreen() {
   };
 
   const onSignOut = async () => {
-    try {
-      await signOut();
-    } catch (err) {
-      Alert.alert('ออกจากระบบไม่สำเร็จ', err?.message ?? 'กรุณาลองใหม่');
-    }
+    Alert.alert(
+      'ออกจากระบบ',
+      'คุณต้องการออกจากระบบใช่หรือไม่?',
+      [
+        { text: 'ยกเลิก', style: 'cancel' },
+        {
+          text: 'ออกจากระบบ',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await signOut();
+            } catch (err) {
+              Alert.alert('ออกจากระบบไม่สำเร็จ', err?.message ?? 'กรุณาลองใหม่');
+            }
+          },
+        },
+      ]
+    );
   };
 
   return (
@@ -52,7 +65,7 @@ export default function RoleOnboardingScreen() {
           disabled={submitting}
           style={[styles.primaryButton, submitting && { opacity: 0.7 }]}
         >
-          <Text style={styles.primaryButtonText}>👨‍🦳 ฉันคือผู้สูงอายุ</Text>
+          <Text style={styles.primaryButtonText}>ฉันคือผู้สูงอายุ</Text>
         </Pressable>
 
         <Pressable
@@ -60,7 +73,7 @@ export default function RoleOnboardingScreen() {
           disabled={submitting}
           style={[styles.secondaryButton, submitting && { opacity: 0.7 }]}
         >
-          <Text style={styles.secondaryButtonText}>👩‍👦 ฉันคือผู้ดูแล/ลูกหลาน</Text>
+          <Text style={styles.secondaryButtonText}>ฉันคือผู้ดูแล / ลูกหลาน</Text>
         </Pressable>
 
         <View style={styles.noteBox}>

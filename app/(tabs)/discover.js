@@ -255,7 +255,7 @@ export default function DiscoverScreen() {
 
       <View style={styles.aiCard}>
         <View style={styles.aiHeaderRow}>
-          <Text style={styles.aiIcon}>🤖</Text>
+          <Ionicons name="sparkles-outline" size={22} color={WarmClearTheme.colors.primary} style={styles.aiIconImg} />
           <View style={styles.aiHeaderBody}>
             <Text style={styles.aiTitle}>AI แนะนำกิจกรรมสำหรับคุณ</Text>
             <Text style={styles.aiSubtitle}>
@@ -425,8 +425,8 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     marginBottom: 12,
   },
-  aiIcon: {
-    fontSize: 30,
+  aiIconImg: {
+    marginTop: 2,
   },
   aiHeaderBody: {
     flex: 1,

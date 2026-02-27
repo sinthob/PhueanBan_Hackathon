@@ -4,7 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 import { currentUser } from '../../data/mockData';
 import { caregiverUser, monitoringSnapshot } from '../../data/caregiverMock';
-import { useAuth } from '../../providers/AuthProvider';
+import { useAuth } from '../../providers/providers';
 import { WarmClearTheme } from '../../theme';
 
 function levelStyle(level) {

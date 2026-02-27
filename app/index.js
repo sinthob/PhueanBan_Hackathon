@@ -2,7 +2,7 @@ import React from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
-import { useAuth } from '../providers/AuthProvider';
+import { useAuth } from '../providers/providers';
 import { WarmClearTheme } from '../theme';
 
 export default function GateScreen() {

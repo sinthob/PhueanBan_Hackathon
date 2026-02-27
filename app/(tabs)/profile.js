@@ -1,8 +1,20 @@
 import React, { useMemo, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+
+// Alert.alert ไม่ทำงานบน Web — ใช้ฟังก์ชันนี้แทนในทุก confirm dialog
+function confirmAction(title, message, onConfirm) {
+  if (Platform.OS === 'web') {
+    if (window.confirm(`${title}\n${message}`)) onConfirm();
+  } else {
+    Alert.alert(title, message, [
+      { text: 'ยกเลิก', style: 'cancel' },
+      { text: 'ยืนยัน', style: 'destructive', onPress: onConfirm },
+    ]);
+  }
+}
 
 import { activities, categories, currentUser } from '../../data/mockData';
-import { useAuth } from '../../providers/AuthProvider';
+import { useAuth } from '../../providers/providers';
 import {
   clearActivityProfile,
   getActivityProfile,
@@ -270,12 +282,18 @@ export default function ProfileScreen() {
           </View>
 
           <Pressable
-            onPress={async () => {
-              try {
-                await signOut();
-              } catch (err) {
-                Alert.alert('ออกจากระบบไม่สำเร็จ', err?.message ?? 'กรุณาลองใหม่');
-              }
+            onPress={() => {
+              confirmAction(
+                'ออกจากระบบ',
+                'คุณต้องการออกจากระบบใช่หรือไม่?',
+                async () => {
+                  try {
+                    await signOut();
+                  } catch (err) {
+                    Alert.alert('ออกจากระบบไม่สำเร็จ', err?.message ?? 'กรุณาลองใหม่');
+                  }
+                }
+              );
             }}
             style={styles.signOutButton}
           >
@@ -301,7 +319,7 @@ export default function ProfileScreen() {
 
       <View style={styles.card}>
         <View style={styles.cardHeaderRow}>
-          <Text style={styles.cardTitle}>🤖 Onboarding: โปรไฟล์กิจกรรม</Text>
+          <Text style={styles.cardTitle}>โปรไฟล์กิจกรรม</Text>
           {activityProfile && !editingProfile ? (
             <Pressable onPress={() => setEditingProfile(true)} style={styles.linkButton}>
               <Text style={styles.linkButtonText}>แก้ไข</Text>
@@ -442,7 +460,7 @@ export default function ProfileScreen() {
 
       <View style={styles.card}>
         <View style={styles.cardHeaderRow}>
-          <Text style={styles.cardTitle}>📅 AI ตัวจัดแผนรายสัปดาห์</Text>
+          <Text style={styles.cardTitle}>AI ตัวจัดแผนรายสัปดาห์</Text>
           <Pressable
             onPress={() => {
               if (!activityProfile && editingProfile) {
@@ -489,7 +507,7 @@ export default function ProfileScreen() {
 
       {selectedPlan ? (
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>✅ ก่อนเข้าร่วม: ลดอุปสรรค</Text>
+          <Text style={styles.cardTitle}>เตรียมตัวก่อนเข้าร่วม</Text>
           <Text style={styles.cardBody}>
             สำหรับ “{selectedPlan.activity.title}” • {selectedPlan.activity.time}
           </Text>
@@ -507,7 +525,7 @@ export default function ProfileScreen() {
                 >
                   <View style={[styles.checkbox, checked && styles.checkboxChecked]}>
                     <Text style={[styles.checkboxText, checked && styles.checkboxTextChecked]}>
-                      {checked ? '✓' : ''}
+                      {checked ? '/' : ''}
                     </Text>
                   </View>
                   <Text style={styles.prepText}>{item}</Text>
@@ -662,7 +680,7 @@ export default function ProfileScreen() {
       ) : null}
 
       <View style={styles.card}>
-        <Text style={styles.cardTitle}>🎯 เป้าหมายรายสัปดาห์</Text>
+        <Text style={styles.cardTitle}>เป้าหมายรายสัปดาห์</Text>
         <Text style={styles.cardBody}>เข้าร่วมกิจกรรมอย่างน้อย 2 ครั้ง</Text>
       </View>
     </ScrollView>

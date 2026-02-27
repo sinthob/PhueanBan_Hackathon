@@ -3,7 +3,7 @@ import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 
 import { LinearGradient } from 'expo-linear-gradient';
 import { Link } from 'expo-router';
 
-import { useAuth } from '../../providers/AuthProvider';
+import { useAuth } from '../../providers/providers';
 import { WarmClearTheme } from '../../theme';
 
 export default function LoginScreen() {
@@ -17,6 +17,12 @@ export default function LoginScreen() {
     const trimmedEmail = email.trim();
     if (!trimmedEmail || !password) {
       Alert.alert('กรอกข้อมูลไม่ครบ', 'กรุณากรอกอีเมลและรหัสผ่าน');
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmedEmail)) {
+      Alert.alert('อีเมลไม่ถูกต้อง', 'กรุณากรอกอีเมลในรูปแบบที่ถูกต้อง');
       return;
     }
 
