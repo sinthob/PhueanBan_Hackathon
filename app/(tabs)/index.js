@@ -1,6 +1,5 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import {
-  ActivityIndicator,
   Alert,
   Image,
   Modal,
@@ -17,93 +16,9 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 import ActivityCard from '../../components/ActivityCard';
 import { activities, categories, currentUser } from '../../data/mockData';
-import { getActivityProfile } from '../../data/aiProfileStore';
 import { getUserActivities, subscribeUserActivities } from '../../data/userActivitiesStore';
 import { WarmClearTheme } from '../../theme';
 
-// ── AI helpers (ย้ายมาจาก discover.js) ──
-function parseDistanceKm(distanceText) {
-  if (typeof distanceText !== 'string') return Number.NaN;
-  const numeric = Number.parseFloat(distanceText.replace(',', '.'));
-  return Number.isFinite(numeric) ? numeric : Number.NaN;
-}
-
-function extractPreferredCategories(inputText) {
-  const text = (inputText || '').toLowerCase();
-  const prefs = new Set();
-  const keywordMap = [
-    { keywords: ['เดิน', 'วิ่ง', 'ออกกำลัง', 'โยคะ', 'ยืดเหยียด'], category: 'exercise' },
-    { keywords: ['ทำอาหาร', 'ทำขนม', 'ขนม', 'ครัว'], category: 'cooking' },
-    { keywords: ['เพื่อน', 'คุย', 'ชุมชน', 'ตลาด', 'พบปะ'], category: 'social' },
-    { keywords: ['จิตอาสา', 'อาสา', 'ปลูกต้นไม้', 'ปลูก'], category: 'volunteer' },
-    { keywords: ['หนัง', 'ภาพยนตร์', 'ดูหนัง', 'บันเทิง'], category: 'entertainment' },
-    { keywords: ['เรียน', 'ฝึก', 'อ่าน', 'เวิร์กช็อป'], category: 'learning' },
-  ];
-  keywordMap.forEach(({ keywords, category }) => {
-    if (keywords.some((kw) => text.includes(kw))) prefs.add(category);
-  });
-  return prefs;
-}
-
-function scoreActivity(activity, preferredCategories, promptText, profile) {
-  let score = 0;
-  const prompt = (promptText || '').toLowerCase();
-  if (preferredCategories?.size && preferredCategories.has(activity.category)) score += 30;
-  if (activity.difficulty === 'ง่าย') score += 16;
-  else if (activity.difficulty === 'ปานกลาง') score += 8;
-  const distanceKm = parseDistanceKm(activity.distance);
-  if (Number.isFinite(distanceKm)) {
-    score += Math.max(0, 15 - distanceKm * 5);
-    if (profile?.distancePref === 'near') score += distanceKm <= 1.0 ? 10 : -10;
-    if (profile?.distancePref === 'medium') score += distanceKm <= 2.5 ? 6 : -6;
-  }
-  if (typeof activity.participants === 'number' && typeof activity.maxParticipants === 'number') {
-    const ratio = activity.maxParticipants > 0 ? activity.participants / activity.maxParticipants : 1;
-    score += Math.max(0, (1 - ratio) * 10);
-  }
-  if (profile?.groupPref === 'small' && typeof activity.maxParticipants === 'number')
-    score += activity.maxParticipants <= 12 ? 8 : -8;
-  if (profile?.groupPref === 'medium' && typeof activity.maxParticipants === 'number')
-    score += activity.maxParticipants <= 20 ? 4 : -4;
-  const tags = Array.isArray(activity.tags) ? activity.tags.join(' ') : '';
-  if (tags.includes('กลุ่มเล็ก')) score += 8;
-  if (tags.includes('ฟรี')) score += 6;
-  if (tags.includes('ในร่ม') && prompt.includes('ในร่ม')) score += 6;
-  if (tags.includes('สบาย') && prompt.includes('สบาย')) score += 4;
-  return score;
-}
-
-function buildReasons(activity, preferredCategories, promptText, profile) {
-  const reasons = [];
-  const prompt = (promptText || '').toLowerCase();
-  if (preferredCategories?.size && preferredCategories.has(activity.category))
-    reasons.push('ตรงกับความสนใจที่บอกไว้');
-  const distanceKm = parseDistanceKm(activity.distance);
-  if (Number.isFinite(distanceKm) && distanceKm <= 1.2) reasons.push('ใกล้บ้าน เดินทางสะดวก');
-  if (profile?.distancePref === 'near' && Number.isFinite(distanceKm) && distanceKm <= 1.0)
-    reasons.push('ตรงเงื่อนไข: ใกล้มาก');
-  if (activity.difficulty === 'ง่าย') reasons.push('ระดับง่าย เหมาะเริ่มต้น');
-  if (typeof activity.maxParticipants === 'number' && activity.maxParticipants <= 12)
-    reasons.push('กลุ่มไม่ใหญ่ ดูแลกันทั่วถึง');
-  if (profile?.groupPref === 'small' && typeof activity.maxParticipants === 'number' && activity.maxParticipants <= 12)
-    reasons.push('ตรงเงื่อนไข: กลุ่มเล็ก');
-  const tags = Array.isArray(activity.tags) ? activity.tags : [];
-  if (tags.some((t) => t.includes('ฟรี'))) reasons.push('ค่าใช้จ่ายไม่สูง/ฟรี');
-  if (tags.some((t) => t.includes('ในร่ม')) && prompt.includes('ในร่ม'))
-    reasons.push('ทำในร่ม เหมาะกับอากาศร้อน');
-  return reasons.slice(0, 3);
-}
-
-function buildAiRecommendations({ promptText, sourceActivities, profile }) {
-  const preferred = extractPreferredCategories(promptText);
-  const scored = sourceActivities
-    .map((activity) => ({ activity, score: scoreActivity(activity, preferred, promptText, profile) }))
-    .sort((a, b) => b.score - a.score);
-  return scored.slice(0, 3).map(({ activity }) => ({
-    activity,
-    reasons: buildReasons(activity, preferred, promptText, profile),
-  }));
-}
 
 import {
   trackCheckinSuccess,
@@ -243,9 +158,6 @@ export default function HomeScreen() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [checkedIn, setCheckedIn] = useState(false);
   const [popupVisible, setPopupVisible] = useState(false);
-  const [aiPrompt, setAiPrompt] = useState('');
-  const [aiLoading, setAiLoading] = useState(false);
-  const [aiResults, setAiResults] = useState([]);
   const [userActivities, setUserActivities] = useState(() => getUserActivities());
   const { dayName, dd, month, buddhistYear, specialDay, nextSpecial, blessing, imageSource, dayOfWeek } = getTodayInfo();
   const polite = currentUser.gender === 'female' ? 'ค่ะ' : 'ครับ';
@@ -298,25 +210,6 @@ export default function HomeScreen() {
     try {
       await trackActivityJoined();
     } catch (_) { }
-  };
-
-  const runAiMock = () => {
-    setAiLoading(true);
-    setAiResults([]);
-    setTimeout(() => {
-      const profile = getActivityProfile();
-      const profileText = profile
-        ? `ระยะทาง:${profile.distancePref} กลุ่ม:${profile.groupPref} เวลา:${profile.timePref}`
-        : '';
-      const promptText = aiPrompt.trim() || `${currentUser.interests?.join(' ') ?? ''} ${profileText}`.trim();
-      const recommendations = buildAiRecommendations({
-        promptText,
-        sourceActivities: activities,
-        profile,
-      });
-      setAiResults(recommendations);
-      setAiLoading(false);
-    }, 650);
   };
 
   const filteredActivities = useMemo(() => {
@@ -450,67 +343,6 @@ export default function HomeScreen() {
         </ScrollView>
 
         <View style={styles.section}>
-          {/* ── กล่อง AI แนะนำ ── */}
-          <View style={styles.aiCard}>
-            <View style={styles.aiHeaderRow}>
-              <Ionicons name="sparkles-outline" size={22} color={WarmClearTheme.colors.primary} style={{ marginTop: 2 }} />
-              <View style={{ flex: 1 }}>
-                <Text style={styles.aiTitle}>AI แนะนำกิจกรรมสำหรับคุณ</Text>
-                <Text style={styles.aiSubtitle}>ใส่ความต้องการสั้นๆ แล้วให้ AI ช่วยคัดให้</Text>
-              </View>
-            </View>
-
-            <TextInput
-              value={aiPrompt}
-              onChangeText={setAiPrompt}
-              placeholder="เช่น อยากขยับร่างกายเบาๆ ใกล้บ้าน"
-              placeholderTextColor={WarmClearTheme.colors.textMuted}
-              style={styles.aiInput}
-            />
-
-            <View style={styles.aiActionRow}>
-              <Pressable
-                onPress={runAiMock}
-                disabled={aiLoading}
-                style={[styles.aiButton, aiLoading && { opacity: 0.7 }]}
-              >
-                <Text style={styles.aiButtonText}>{aiLoading ? 'กำลังคิด...' : 'ให้ AI แนะนำ'}</Text>
-              </Pressable>
-              <Pressable
-                onPress={() => { setAiPrompt(''); setAiResults([]); }}
-                disabled={aiLoading}
-                style={styles.aiSecondaryButton}
-              >
-                <Text style={styles.aiSecondaryButtonText}>ล้าง</Text>
-              </Pressable>
-            </View>
-
-            {aiLoading ? (
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 12 }}>
-                <ActivityIndicator color={WarmClearTheme.colors.primary} />
-                <Text style={styles.aiSubtitle}>กำลังจัดชุดกิจกรรมที่เหมาะกับคุณ…</Text>
-              </View>
-            ) : null}
-
-            {aiResults.length > 0 ? (
-              <View style={{ marginTop: 14 }}>
-                <Text style={styles.aiResultsTitle}>แนะนำ 3 กิจกรรม</Text>
-                {aiResults.map((rec) => (
-                  <View key={`ai-${rec.activity.id}`} style={{ marginBottom: 4 }}>
-                    <View style={styles.reasonRow}>
-                      {rec.reasons.map((reason, idx) => (
-                        <View key={`${rec.activity.id}-r-${idx}`} style={styles.reasonChip}>
-                          <Text style={styles.reasonText}>{reason}</Text>
-                        </View>
-                      ))}
-                    </View>
-                    <ActivityCard activity={rec.activity} onJoin={handleJoin} />
-                  </View>
-                ))}
-              </View>
-            ) : null}
-          </View>
-
           <View style={styles.sectionHeaderRow}>
             <Text style={styles.sectionTitle}>
               {showFiltered ? 'ผลการค้นหา' : 'กิจกรรมเด่นใกล้คุณ'}
@@ -759,104 +591,4 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
 
-  // ── AI Card ──
-  aiCard: {
-    backgroundColor: WarmClearTheme.colors.surface,
-    borderRadius: WarmClearTheme.radii.card,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: WarmClearTheme.colors.border,
-    marginBottom: 20,
-    ...WarmClearTheme.shadows.card,
-  },
-  aiHeaderRow: {
-    flexDirection: 'row',
-    gap: 12,
-    alignItems: 'flex-start',
-    marginBottom: 12,
-  },
-  aiTitle: {
-    fontSize: 18,
-    fontWeight: '900',
-    color: WarmClearTheme.colors.text,
-    marginBottom: 4,
-  },
-  aiSubtitle: {
-    fontSize: 15,
-    color: WarmClearTheme.colors.textSub,
-    lineHeight: 22,
-    fontWeight: '700',
-  },
-  aiInput: {
-    backgroundColor: WarmClearTheme.colors.surfaceSoft,
-    borderRadius: WarmClearTheme.radii.control,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    minHeight: 48,
-    fontSize: 16,
-    borderWidth: 1,
-    borderColor: WarmClearTheme.colors.border,
-    marginBottom: 12,
-    color: WarmClearTheme.colors.text,
-    fontWeight: '700',
-  },
-  aiActionRow: {
-    flexDirection: 'row',
-    gap: 10,
-    alignItems: 'center',
-  },
-  aiButton: {
-    flex: 1,
-    backgroundColor: WarmClearTheme.colors.primary,
-    borderRadius: WarmClearTheme.radii.control,
-    minHeight: 48,
-    alignItems: 'center',
-    justifyContent: 'center',
-    ...WarmClearTheme.shadows.button,
-  },
-  aiButtonText: {
-    fontSize: 16,
-    fontWeight: '900',
-    color: '#ffffff',
-  },
-  aiSecondaryButton: {
-    paddingHorizontal: 14,
-    minHeight: 48,
-    borderRadius: WarmClearTheme.radii.control,
-    borderWidth: 1,
-    borderColor: WarmClearTheme.colors.border,
-    backgroundColor: WarmClearTheme.colors.surface,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  aiSecondaryButtonText: {
-    fontSize: 16,
-    fontWeight: '900',
-    color: WarmClearTheme.colors.text,
-  },
-  aiResultsTitle: {
-    fontSize: 16,
-    fontWeight: '900',
-    color: WarmClearTheme.colors.text,
-    marginBottom: 10,
-  },
-  reasonRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginBottom: 10,
-  },
-  reasonChip: {
-    backgroundColor: WarmClearTheme.colors.primarySoft,
-    borderRadius: WarmClearTheme.radii.chip,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderWidth: 1,
-    borderColor: WarmClearTheme.colors.primarySoftBorder,
-  },
-  reasonText: {
-    fontSize: 14,
-    color: WarmClearTheme.colors.primaryDark,
-    fontWeight: '900',
-  },
 });
