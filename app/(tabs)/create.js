@@ -446,7 +446,7 @@ export default function CreateActivityScreen() {
         <TextInput
           value={details}
           onChangeText={(t) => { setDetails(t); setAiGenerated(''); }}
-          placeholder="ไม่เขียนก็ได้ — กด AI ช่วยเขียน ด้านล่าง"
+          placeholder="กด AI ช่วยเขียน ด้านล่าง"
           placeholderTextColor={WarmClearTheme.colors.textMuted}
           style={[styles.input, styles.textArea, aiGenerated && details === aiGenerated && styles.inputAiGenerated]}
           multiline

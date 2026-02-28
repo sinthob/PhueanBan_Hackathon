@@ -2,12 +2,10 @@ import React, { useMemo, useState } from 'react';
 import {
   Alert,
   Linking,
-  Modal,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from 'react-native';
 
@@ -43,8 +41,6 @@ export default function FriendsScreen() {
   const myFriends = useMemo(() => friends.filter((f) => myFriendIdSet.has(f.id)), [myFriendIdSet]);
 
   const [activeTab, setActiveTab] = useState('recommended');
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [searchName, setSearchName] = useState('');
 
   const [relationshipById, setRelationshipById] = useState(() => ({}));
 
@@ -193,15 +189,6 @@ export default function FriendsScreen() {
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <View style={styles.topBar}>
         <Text style={styles.screenTitle}>เพื่อน</Text>
-        <Pressable
-          onPress={() => setSearchOpen(true)}
-          accessibilityRole="button"
-          accessibilityLabel="เพิ่มเพื่อนใน LINE"
-          style={styles.searchButton}
-        >
-          <Ionicons name="person-add-outline" size={18} color={WarmClearTheme.colors.primaryDark} />
-          <Text style={styles.searchButtonText}>เพิ่มเพื่อนใน LINE</Text>
-        </Pressable>
       </View>
 
       <View style={styles.tabRow}>
@@ -226,89 +213,14 @@ export default function FriendsScreen() {
       </View>
 
       {activeTab === 'recommended' ? (
-        <Text style={styles.helperText}>คนที่เคยทำกิจกรรมร่วมกัน และอาจอยากเป็นเพื่อนกัน</Text>
+        <Text style={styles.helperText}></Text>
       ) : (
-        <Text style={styles.helperText}>รายชื่อเพื่อนที่คุณเชื่อมต่อแล้ว</Text>
+        <Text style={styles.helperText}></Text>
       )}
 
       {activeTab === 'recommended'
         ? recommendedFriends.map((friend) => renderPersonCard(friend, { mode: 'recommended' }))
         : myFriends.map((friend) => renderPersonCard(friend, { mode: 'myFriends' }))}
-
-      {/* Modal เพิ่มเพื่อนใน LINE */}
-      <Modal
-        visible={searchOpen}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setSearchOpen(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalPanel}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>เพิ่มเพื่อนใน LINE</Text>
-              <Pressable
-                onPress={() => setSearchOpen(false)}
-                accessibilityRole="button"
-                accessibilityLabel="ปิด"
-                style={styles.modalClose}
-              >
-                <Ionicons name="close" size={20} color={WarmClearTheme.colors.text} />
-              </Pressable>
-            </View>
-
-            {/* LINE ID */}
-            <Text style={styles.modalLabel}>ค้นหาด้วย LINE ID</Text>
-            <TextInput
-              value={searchName}
-              onChangeText={setSearchName}
-              placeholder="พิมพ์ LINE ID เพื่อน..."
-              placeholderTextColor={WarmClearTheme.colors.textMuted}
-              style={styles.modalInput}
-              autoCapitalize="none"
-              autoCorrect={false}
-            />
-
-            <Pressable
-              onPress={() => {
-                if (!searchName.trim()) return;
-                const url = `https://line.me/ti/p/~${searchName.trim()}`;
-                Linking.openURL(url).catch(() =>
-                  Alert.alert('ไม่สามารถเปิด LINE ได้', 'กรุณาติดตั้ง LINE ก่อนใช้งาน')
-                );
-              }}
-              accessibilityRole="button"
-              style={[styles.lineSearchButton, !searchName.trim() && { opacity: 0.5 }]}
-            >
-              <Text style={styles.lineSearchButtonText}>💚 ค้นหาใน LINE</Text>
-            </Pressable>
-
-            <View style={styles.modalDivider}>
-              <View style={styles.dividerLine} />
-              <Text style={styles.modalDividerText}>หรือ</Text>
-              <View style={styles.dividerLine} />
-            </View>
-
-            {/* QR Code */}
-            <Pressable
-              onPress={() => {
-                Linking.openURL('https://line.me/R/nv/addFriends').catch(() =>
-                  Alert.alert('ไม่สามารถเปิด LINE ได้', 'กรุณาติดตั้ง LINE ก่อนใช้งาน')
-                );
-              }}
-              accessibilityRole="button"
-              accessibilityLabel="สแกน QR เพื่อเพิ่มเพื่อนใน LINE"
-              style={styles.qrButton}
-            >
-              <Ionicons name="qr-code-outline" size={22} color="#fff" />
-              <Text style={styles.qrButtonText}>สแกน QR เพิ่มเพื่อนใน LINE</Text>
-            </Pressable>
-
-            <Text style={styles.modalHint}>
-              กดปุ่มด้านบนเพื่อเปิดแอป LINE โดยตรง
-            </Text>
-          </View>
-        </View>
-      </Modal>
     </ScrollView>
   );
 }
