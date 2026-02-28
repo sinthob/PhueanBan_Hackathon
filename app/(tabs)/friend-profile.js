@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Linking, Pressable, ScrollView, StyleSheet, Text, View, Alert } from 'react-native';
 
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -7,11 +7,13 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { friends } from '../../data/mockData';
 import { WarmClearTheme } from '../../theme';
 
-function getStatusLabel(friend) {
-  if (!friend) return '';
-  if (friend.status === 'online') return 'ออนไลน์';
-  return `ใช้งานล่าสุด: ${friend.lastActive}`;
-}
+// mock: วันที่พบกันล่าสุด (กิจกรรมล่าสุดที่เจอกัน)
+const lastMetDateByFriendId = {
+  f1: '12 ม.ค. 2568',
+  f2: '5 ม.ค. 2568',
+  f3: '28 ธ.ค. 2567',
+  f4: '20 ธ.ค. 2567',
+};
 
 export default function FriendProfileScreen() {
   const router = useRouter();
@@ -29,6 +31,16 @@ export default function FriendProfileScreen() {
     };
     return byId[friendId] ?? 'กิจกรรมชุมชน';
   }, [friendId]);
+
+  const lastMetDate = lastMetDateByFriendId[friendId] ?? '-';
+
+  const onAddLine = () => {
+    const lineId = friend?.lineId ?? `goodneighbor_${friendId}`;
+    const lineUrl = `https://line.me/ti/p/~${lineId}`;
+    Linking.openURL(lineUrl).catch(() =>
+      Alert.alert('ไม่สามารถเปิด LINE ได้', 'กรุณาติดตั้ง LINE ก่อนใช้งาน')
+    );
+  };
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
@@ -50,23 +62,25 @@ export default function FriendProfileScreen() {
 
         {friend ? (
           <View style={styles.hero}>
+            {/* Avatar */}
             <View style={styles.avatarRing}>
               <View style={styles.avatarCircle}>
                 <Text style={styles.avatarText}>{friend.avatar}</Text>
               </View>
             </View>
 
+            {/* ชื่อ */}
             <Text style={styles.name}>{friend.name}</Text>
-            <Text style={styles.status}>{getStatusLabel(friend)}</Text>
 
+            {/* Info pills — เจอกันที่ + วันที่ */}
             <View style={styles.infoPillsRow}>
               <View style={styles.infoPill}>
-                <Ionicons name="location-outline" size={18} color={WarmClearTheme.colors.primaryDark} />
-                <Text style={styles.infoPillText}>{friend.distance}</Text>
+                <Ionicons name="walk-outline" size={18} color={WarmClearTheme.colors.primaryDark} />
+                <Text style={styles.infoPillText}>เจอกันที่: {metAtLabel}</Text>
               </View>
               <View style={styles.infoPill}>
                 <Ionicons name="calendar-outline" size={18} color={WarmClearTheme.colors.primaryDark} />
-                <Text style={styles.infoPillText}>เจอกันที่: {metAtLabel}</Text>
+                <Text style={styles.infoPillText}>ครั้งล่าสุด: {lastMetDate}</Text>
               </View>
             </View>
           </View>
@@ -79,11 +93,36 @@ export default function FriendProfileScreen() {
       </View>
 
       {friend ? (
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>ข้อมูลการทำกิจกรรมร่วมกัน</Text>
-          <Text style={styles.cardBody}>กิจกรรมร่วมกัน: {friend.commonActivities} ครั้ง</Text>
-          <Text style={styles.cardBody}>สถิติการเจอกัน: {friend.streak} วัน</Text>
-        </View>
+        <>
+          {/* กิจกรรมร่วมกัน */}
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>กิจกรรมร่วมกัน</Text>
+            <View style={styles.statRow}>
+              <Ionicons name="people-outline" size={20} color={WarmClearTheme.colors.primaryDark} />
+              <Text style={styles.cardBody}>
+                เข้าร่วมกิจกรรมร่วมกัน{' '}
+                <Text style={styles.highlight}>{friend.commonActivities} ครั้ง</Text>
+              </Text>
+            </View>
+            <View style={styles.statRow}>
+              <Ionicons name="flame-outline" size={20} color={WarmClearTheme.colors.primaryDark} />
+              <Text style={styles.cardBody}>
+                สถิติการเจอกัน{' '}
+                <Text style={styles.highlight}>{friend.streak} วัน</Text>
+              </Text>
+            </View>
+          </View>
+
+          {/* ปุ่มเพิ่มเพื่อนใน LINE */}
+          <Pressable
+            onPress={onAddLine}
+            accessibilityRole="button"
+            accessibilityLabel="เพิ่มเพื่อนใน LINE"
+            style={styles.lineButton}
+          >
+            <Text style={styles.lineButtonText}>เพิ่มเพื่อนใน LINE</Text>
+          </Pressable>
+        </>
       ) : null}
     </ScrollView>
   );
@@ -168,13 +207,6 @@ const styles = StyleSheet.create({
     color: WarmClearTheme.colors.text,
     textAlign: 'center',
   },
-  status: {
-    marginTop: 6,
-    fontSize: 16,
-    fontWeight: '800',
-    color: WarmClearTheme.colors.textSub,
-    textAlign: 'center',
-  },
   infoPillsRow: {
     marginTop: 12,
     width: '100%',
@@ -199,6 +231,7 @@ const styles = StyleSheet.create({
     flexShrink: 1,
   },
 
+  // Card
   card: {
     marginTop: 14,
     backgroundColor: WarmClearTheme.colors.surface,
@@ -210,14 +243,40 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '900',
     color: WarmClearTheme.colors.text,
-    marginBottom: 10,
+    marginBottom: 12,
+  },
+  statRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginTop: 6,
   },
   cardBody: {
     fontSize: 16,
     fontWeight: '700',
     color: WarmClearTheme.colors.textSub,
     lineHeight: 22,
-    marginTop: 6,
+    flex: 1,
+  },
+  highlight: {
+    fontWeight: '900',
+    color: WarmClearTheme.colors.primaryDark,
+  },
+
+  // LINE Button
+  lineButton: {
+    marginTop: 16,
+    minHeight: 56,
+    borderRadius: WarmClearTheme.radii.control,
+    backgroundColor: '#06C755',
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...WarmClearTheme.shadows.button,
+  },
+  lineButtonText: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: '#ffffff',
   },
 
   missingTitle: {

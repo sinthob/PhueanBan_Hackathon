@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GoodNeighbor → Line OA Full Analysis</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+Thai:wght@400;600;700;800;900&family=Sarabun:wght@400;600;700;800;900&family=IBM+Plex+Mono:wght@500;600&display=swap');
+
+:root {
+  --line:        #06C755;
+  --line-dark:   #00a040;
+  --line-soft:   #e6f9ee;
+  --line-border: #a7f3c0;
+  --app:         #0d9488;
+  --app-dark:    #1f7a6e;
+  --app-soft:    #e6faf7;
+  --app-border:  #99e6dc;
+  --green:       #059669;
+  --green-soft:  #d1fae5;
+  --green-border:#6ee7b7;
+  --yellow:      #d97706;
+  --yellow-soft: #fef9e7;
+  --yellow-border:#fcd34d;
+  --red:         #dc2626;
+  --red-soft:    #fff0f0;
+  --red-border:  #fca5a5;
+  --blue:        #2563eb;
+  --blue-soft:   #eff6ff;
+  --blue-border: #93c5fd;
+  --purple:      #7c3aed;
+  --purple-soft: #f5f3ff;
+  --purple-border:#c4b5fd;
+  --orange:      #ea580c;
+  --orange-soft: #fff7ed;
+  --orange-border:#fed7aa;
+  --gray:        #6b7280;
+  --gray-light:  #f9fafb;
+  --gray-border: #e5e7eb;
+  --text:        #111827;
+  --text-sub:    #4b5563;
+  --surface:     #ffffff;
+  --bg:          #f0fdf9;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Sarabun', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  padding: 28px 16px 100px;
+  line-height: 1.6;
+}
+
+/* ─── PAGE HEADER ─── */
+.hero-header {
+  background: linear-gradient(135deg, var(--app-dark) 0%, #0d9488 40%, var(--line-dark) 100%);
+  border-radius: 24px;
+  padding: 36px 28px;
+  margin-bottom: 28px;
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+.hero-header::before {
+  content: '';
+  position: absolute;
+  right: -60px; top: -60px;
+  width: 220px; height: 220px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 50%;
+}
+.hero-header::after {
+  content: '';
+  position: absolute;
+  right: 30px; bottom: -40px;
+  width: 120px; height: 120px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 50%;
+}
+.hero-eyebrow {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 3px;
+  opacity: 0.75;
+  margin-bottom: 10px;
+}
+.hero-title {
+  font-family: 'Noto Serif Thai', serif;
+  font-size: clamp(20px, 4vw, 28px);
+  font-weight: 900;
+  line-height: 1.3;
+  margin-bottom: 10px;
+}
+.hero-title span { opacity: 0.65; }
+.hero-desc {
+  font-size: 14px;
+  font-weight: 600;
+  opacity: 0.85;
+  max-width: 520px;
+}
+.hero-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 18px;
+}
+.hero-badge {
+  font-size: 11px;
+  font-weight: 800;
+  padding: 5px 12px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.25);
+}
+
+/* ─── SECTION ─── */
+.section {
+  background: var(--surface);
+  border-radius: 20px;
+  border: 1.5px solid var(--gray-border);
+  padding: 26px;
+  margin-bottom: 22px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+}
+.section-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 22px;
+  padding-bottom: 14px;
+  border-bottom: 1.5px solid var(--gray-border);
+}
+.section-num {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 900;
+  background: var(--app-dark); color: white;
+  flex-shrink: 0;
+}
+.section-title {
+  font-size: 17px;
+  font-weight: 900;
+  color: var(--text);
+  flex: 1;
+}
+.section-tag {
+  font-size: 11px;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: 8px;
+  background: var(--gray-light);
+  border: 1px solid var(--gray-border);
+  color: var(--gray);
+}
+
+/* ─── MIGRATION TABLE ─── */
+.migration-table {
+  display: grid;
+  grid-template-columns: 220px 1fr 1fr 90px;
+  gap: 0;
+  border: 1.5px solid var(--gray-border);
+  border-radius: 14px;
+  overflow: hidden;
+  font-size: 13px;
+}
+.mt-header {
+  display: contents;
+}
+.mt-cell {
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--gray-border);
+  border-right: 1px solid var(--gray-border);
+}
+.mt-cell:last-child { border-right: none; }
+.mt-cell:nth-child(4n) { border-right: none; }
+.mt-head-cell {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  background: var(--gray-light);
+  color: var(--gray);
+  padding: 10px 14px;
+  border-bottom: 1.5px solid var(--gray-border);
+  border-right: 1px solid var(--gray-border);
+}
+.mt-head-cell:last-child { border-right: none; }
+.feature-name-cell {
+  font-weight: 800;
+  color: var(--text);
+}
+.feature-file {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--gray);
+  margin-top: 2px;
+}
+.what-cell { color: var(--text-sub); font-weight: 700; }
+.how-cell { color: var(--text-sub); font-weight: 700; }
+.status-pill {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+.s-full    { background: var(--green-soft);  color: var(--green);  border: 1px solid var(--green-border); }
+.s-partial { background: var(--yellow-soft); color: var(--yellow); border: 1px solid var(--yellow-border); }
+.s-lost    { background: var(--red-soft);    color: var(--red);    border: 1px solid var(--red-border); }
+.s-new     { background: var(--purple-soft); color: var(--purple); border: 1px solid var(--purple-border); }
+
+/* row color tinting */
+.row-full    .mt-cell { background: rgba(209,250,229,0.15); }
+.row-partial .mt-cell { background: rgba(254,249,231,0.25); }
+.row-lost    .mt-cell { background: rgba(255,240,240,0.25); }
+
+/* ─── WHAT'S LOST ─── */
+.lost-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 14px;
+}
+.lost-card {
+  border-radius: 14px;
+  border: 1.5px solid var(--red-border);
+  background: var(--red-soft);
+  padding: 16px;
+}
+.lost-card-title {
+  font-size: 14px;
+  font-weight: 900;
+  color: var(--red);
+  margin-bottom: 6px;
+  display: flex; align-items: center; gap: 7px;
+}
+.lost-card-file {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  color: #b91c1c;
+  margin-bottom: 8px;
+  background: rgba(220,38,38,0.08);
+  padding: 2px 7px;
+  border-radius: 5px;
+  display: inline-block;
+}
+.lost-card-why { font-size: 13px; font-weight: 700; color: #b91c1c; margin-bottom: 8px; }
+.lost-card-alt {
+  font-size: 12px;
+  font-weight: 700;
+  color: #065f46;
+  background: var(--green-soft);
+  border: 1px solid var(--green-border);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+.lost-card-alt::before { content: '💡 ทางออก: '; font-weight: 900; }
+
+/* ─── ARCHITECTURE SPLIT ─── */
+.arch-split {
+  display: grid;
+  grid-template-columns: 1fr 60px 1fr;
+  gap: 0;
+  align-items: start;
+}
+.arch-col-title {
+  text-align: center;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  padding: 9px 16px;
+  border-radius: 12px;
+  margin-bottom: 14px;
+}
+.arch-col-app   { background: var(--app-dark); color: white; }
+.arch-col-line  { background: var(--line-dark); color: white; }
+.arch-arrow-col {
+  display: flex; flex-direction: column;
+  align-items: center;
+  padding-top: 56px;
+  gap: 46px;
+}
+.arch-arrow-col span { font-size: 20px; color: var(--gray); }
+
+.arch-block {
+  border-radius: 13px;
+  padding: 13px;
+  margin-bottom: 10px;
+  border: 1.5px solid;
+}
+.arch-block-label {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+.arch-block-title {
+  font-size: 14px;
+  font-weight: 900;
+  margin-bottom: 3px;
+}
+.arch-block-desc {
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.6;
+}
+
+.ab-app     { background: var(--app-soft);    border-color: var(--app-border); }
+.ab-app     .arch-block-label { color: var(--app-dark); }
+.ab-app     .arch-block-title { color: var(--app-dark); }
+.ab-line    { background: var(--line-soft);   border-color: var(--line-border); }
+.ab-line    .arch-block-label { color: var(--line-dark); }
+.ab-line    .arch-block-title { color: var(--line-dark); }
+.ab-liff    { background: var(--blue-soft);   border-color: var(--blue-border); }
+.ab-liff    .arch-block-label { color: var(--blue); }
+.ab-liff    .arch-block-title { color: var(--blue); }
+.ab-lost    { background: var(--red-soft);    border-color: var(--red-border); opacity: 0.75; }
+.ab-lost    .arch-block-label { color: var(--red); }
+.ab-lost    .arch-block-title { color: var(--red); }
+.ab-new     { background: var(--purple-soft); border-color: var(--purple-border); }
+.ab-new     .arch-block-label { color: var(--purple); }
+.ab-new     .arch-block-title { color: var(--purple); }
+.ab-shared  { background: var(--orange-soft); border-color: var(--orange-border); }
+.ab-shared  .arch-block-label { color: var(--orange); }
+.ab-shared  .arch-block-title { color: var(--orange); }
+
+/* ─── PROS / CONS ─── */
+.pros-cons-wrap {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+.pros-col, .cons-col {
+  border-radius: 16px;
+  padding: 20px;
+  border: 1.5px solid;
+}
+.pros-col {
+  background: var(--green-soft);
+  border-color: var(--green-border);
+}
+.cons-col {
+  background: var(--red-soft);
+  border-color: var(--red-border);
+}
+.pc-header {
+  font-size: 15px;
+  font-weight: 900;
+  margin-bottom: 16px;
+  display: flex; align-items: center; gap: 8px;
+}
+.pros-col .pc-header { color: var(--green); }
+.cons-col .pc-header { color: var(--red); }
+
+.pc-item {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 13px;
+  padding-bottom: 13px;
+  border-bottom: 1px solid rgba(0,0,0,0.07);
+}
+.pc-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+.pc-icon {
+  width: 28px; height: 28px; flex-shrink: 0;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px;
+}
+.pros-col .pc-icon { background: rgba(5,150,105,0.15); }
+.cons-col .pc-icon { background: rgba(220,38,38,0.12); }
+.pc-text { flex: 1; }
+.pc-text strong {
+  display: block;
+  font-size: 13px;
+  font-weight: 900;
+  margin-bottom: 3px;
+}
+.pros-col .pc-text strong { color: #065f46; }
+.cons-col .pc-text strong { color: #991b1b; }
+.pc-text p {
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.6;
+}
+.pros-col .pc-text p { color: #047857; }
+.cons-col .pc-text p { color: #b91c1c; }
+
+/* ─── STRATEGY ─── */
+.strategy-wrap {
+  background: linear-gradient(135deg, var(--app-dark), #0d9488 50%, var(--line-dark));
+  border-radius: 18px;
+  padding: 26px;
+  color: white;
+}
+.strategy-title {
+  font-size: 16px;
+  font-weight: 900;
+  margin-bottom: 18px;
+  display: flex; align-items: center; gap: 8px;
+}
+.strategy-phases {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 14px;
+}
+.phase-card {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 14px;
+  padding: 16px;
+}
+.phase-num {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  opacity: 0.65;
+  margin-bottom: 6px;
+}
+.phase-title {
+  font-size: 14px;
+  font-weight: 900;
+  margin-bottom: 8px;
+  color: #a7f3d0;
+}
+.phase-items {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.phase-items li {
+  font-size: 12px;
+  font-weight: 700;
+  opacity: 0.9;
+  display: flex; align-items: flex-start; gap: 6px;
+}
+.phase-items li::before { content: '→'; opacity: 0.6; flex-shrink: 0; margin-top: 1px; }
+
+/* ─── TECH STACK ─── */
+.tech-compare {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.tech-col { border-radius: 14px; padding: 18px; border: 1.5px solid; }
+.tech-col-app  { background: var(--app-soft);  border-color: var(--app-border); }
+.tech-col-line { background: var(--line-soft); border-color: var(--line-border); }
+.tech-col-title {
+  font-size: 13px;
+  font-weight: 900;
+  padding: 7px 12px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  text-align: center;
+}
+.tech-col-app  .tech-col-title { background: var(--app-dark); color: white; }
+.tech-col-line .tech-col-title { background: var(--line-dark); color: white; }
+.tech-item {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 7px 10px;
+  border-radius: 8px;
+  margin-bottom: 6px;
+  border: 1px solid;
+  display: flex; align-items: center; gap: 7px;
+}
+.ti-keep    { background: var(--green-soft);  border-color: var(--green-border); color: #065f46; }
+.ti-remove  { background: var(--red-soft);    border-color: var(--red-border);   color: var(--red); }
+.ti-new     { background: var(--purple-soft); border-color: var(--purple-border);color: var(--purple); }
+.ti-shared  { background: var(--blue-soft);   border-color: var(--blue-border);  color: var(--blue); }
+.ti-dot {
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+}
+
+/* legend */
+.legend-row {
+  display: flex; flex-wrap: wrap; gap: 10px;
+  margin-bottom: 20px;
+}
+.legend-chip {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 700;
+  padding: 5px 12px;
+  border-radius: 20px;
+  border: 1.5px solid;
+}
+
+/* summary numbers */
+.summary-nums {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 22px;
+}
+.sum-card {
+  border-radius: 14px;
+  padding: 16px;
+  text-align: center;
+  border: 1.5px solid;
+}
+.sum-num { font-size: 36px; font-weight: 900; line-height: 1; margin-bottom: 5px; }
+.sum-label { font-size: 12px; font-weight: 700; }
+
+@media (max-width: 640px) {
+  .migration-table { grid-template-columns: 1fr 1fr; font-size: 12px; }
+  .mt-cell:nth-child(2n) { border-right: none; }
+  .arch-split { grid-template-columns: 1fr; }
+  .arch-arrow-col { display: none; }
+  .pros-cons-wrap { grid-template-columns: 1fr; }
+  .tech-compare { grid-template-columns: 1fr; }
+  .summary-nums { grid-template-columns: repeat(2, 1fr); }
+  .strategy-phases { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- HERO HEADER -->
+<div class="hero-header">
+  <div class="hero-eyebrow">GOODNEIGHBOR · LINE OA ADAPTATION ANALYSIS</div>
+  <div class="hero-title">ถ้าประยุกต์โปรเจคเข้ากับ Line OA<br><span>— อะไรไป อะไรอยู่ อะไรหาย?</span></div>
+  <div class="hero-desc">วิเคราะห์ครบ 3 มิติ: การย้ายฟีเจอร์ · ข้อดีข้อเสีย · แนวทางที่แนะนำ<br>จากโค้ดจริงของทุก Screen ใน GoodNeighbor</div>
+  <div class="hero-badges">
+    <span class="hero-badge">11 Screens วิเคราะห์</span>
+    <span class="hero-badge">2 Roles: Elder + Caregiver</span>
+    <span class="hero-badge">Flex Message · LIFF · Webhook · Rich Menu</span>
+  </div>
+</div>
+
+<!-- LEGEND -->
+<div class="legend-row">
+  <div class="legend-chip" style="background:var(--green-soft);border-color:var(--green-border);color:#065f46">
+    <div style="width:10px;height:10px;border-radius:50%;background:var(--green)"></div> ย้ายได้เต็ม
+  </div>
+  <div class="legend-chip" style="background:var(--yellow-soft);border-color:var(--yellow-border);color:var(--yellow)">
+    <div style="width:10px;height:10px;border-radius:50%;background:var(--yellow)"></div> ย้ายได้บางส่วน (ต้อง LIFF)
+  </div>
+  <div class="legend-chip" style="background:var(--red-soft);border-color:var(--red-border);color:var(--red)">
+    <div style="width:10px;height:10px;border-radius:50%;background:var(--red)"></div> หายไป / ทำไม่ได้บน Line
+  </div>
+  <div class="legend-chip" style="background:var(--purple-soft);border-color:var(--purple-border);color:var(--purple)">
+    <div style="width:10px;height:10px;border-radius:50%;background:var(--purple)"></div> ฟีเจอร์ใหม่จาก Line OA
+  </div>
+</div>
+
+<!-- SUMMARY NUMBERS -->
+<div class="summary-nums">
+  <div class="sum-card" style="background:var(--green-soft);border-color:var(--green-border)">
+    <div class="sum-num" style="color:var(--green)">5</div>
+    <div class="sum-label" style="color:#065f46">ฟีเจอร์ย้ายได้เต็ม</div>
+  </div>
+  <div class="sum-card" style="background:var(--yellow-soft);border-color:var(--yellow-border)">
+    <div class="sum-num" style="color:var(--yellow)">4</div>
+    <div class="sum-label" style="color:var(--yellow)">ต้องผ่าน LIFF</div>
+  </div>
+  <div class="sum-card" style="background:var(--red-soft);border-color:var(--red-border)">
+    <div class="sum-num" style="color:var(--red)">5</div>
+    <div class="sum-label" style="color:var(--red)">หายไปจาก Line OA</div>
+  </div>
+  <div class="sum-card" style="background:var(--purple-soft);border-color:var(--purple-border)">
+    <div class="sum-num" style="color:var(--purple)">6</div>
+    <div class="sum-label" style="color:var(--purple)">ฟีเจอร์ใหม่ที่ได้มา</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════ -->
+<!-- SECTION 1: MIGRATION TABLE    -->
+<!-- ══════════════════════════════ -->
+<div class="section">
+  <div class="section-head">
+    <div class="section-num">1</div>
+    <div class="section-title">แผนผังย้ายฟีเจอร์ — ทุก Screen ทุกฟังก์ชัน</div>
+    <div class="section-tag">11 screens</div>
+  </div>
+
+  <div class="migration-table">
+    <!-- header -->
+    <div class="mt-head-cell">ฟีเจอร์ / หน้าจอ</div>
+    <div class="mt-head-cell">ของเดิมทำอะไร</div>
+    <div class="mt-head-cell">Line OA ทำแทนอย่างไร</div>
+    <div class="mt-head-cell">สถานะ</div>
+
+    <!-- === AUTH === -->
+    <div class="mt-cell feature-name-cell row-lost">
+      Login Screen<div class="feature-file">login.js</div>
+    </div>
+    <div class="mt-cell what-cell row-lost">Email+Password form, signInWithPassword()</div>
+    <div class="mt-cell how-cell row-lost">Line OA ใช้ LINE Login OAuth แทนทั้งหมด ไม่มี email/password อีกต่อไป</div>
+    <div class="mt-cell row-lost"><span class="status-pill s-lost">หายไป</span></div>
+
+    <div class="mt-cell feature-name-cell row-partial">
+      Signup Screen<div class="feature-file">signup.js</div>
+    </div>
+    <div class="mt-cell what-cell row-partial">Form เก็บ role, gender, healthCategory, avatar, activityInterests</div>
+    <div class="mt-cell how-cell row-partial">LINE Login ให้ชื่อ+รูปมาเลย แต่ role/healthCategory/interests ต้องเปิด LIFF form ครั้งแรก</div>
+    <div class="mt-cell row-partial"><span class="status-pill s-partial">LIFF</span></div>
+
+    <!-- === ELDER TABS === -->
+    <div class="mt-cell feature-name-cell row-partial">
+      Tab Bar + Navigation<div class="feature-file">(tabs)/_layout.js</div>
+    </div>
+    <div class="mt-cell what-cell row-partial">Bottom Tab 5 ปุ่ม + Create FAB, Stack navigation</div>
+    <div class="mt-cell how-cell row-partial">Rich Menu (6 ช่อง) ใต้ chat แทน Tab Bar, Postback Action นำทาง</div>
+    <div class="mt-cell row-partial"><span class="status-pill s-partial">แทนด้วย Rich Menu</span></div>
+
+    <div class="mt-cell feature-name-cell row-full">
+      หน้าหลัก กิจกรรม<div class="feature-file">index.js (tabs)</div>
+    </div>
+    <div class="mt-cell what-cell row-full">รายการกิจกรรม filter ตาม category</div>
+    <div class="mt-cell how-cell row-full">Flex Message Carousel แสดงกิจกรรมล่าสุด, กดปุ่มสมัครได้เลย</div>
+    <div class="mt-cell row-full"><span class="status-pill s-full">ย้ายได้เต็ม</span></div>
+
+    <div class="mt-cell feature-name-cell row-partial">
+      ค้นหา + AI แนะนำ<div class="feature-file">discover.js</div>
+    </div>
+    <div class="mt-cell what-cell row-partial">Search bar, category filter chips, AI scoring, reason chips, Mic button</div>
+    <div class="mt-cell how-cell row-partial">พิมพ์ใน chat → Webhook ส่งผล Flex Carousel แต่ interactive filter/mic ต้องเปิด LIFF</div>
+    <div class="mt-cell row-partial"><span class="status-pill s-partial">LIFF บางส่วน</span></div>
+
+    <div class="mt-cell feature-name-cell row-partial">
+      ข้อความ + Chatbot<div class="feature-file">messages.js</div>
+    </div>
+    <div class="mt-cell what-cell row-partial">Chat list, thread view, Bot mode + Edge Function AI</div>
+    <div class="mt-cell how-cell row-partial">Line Chat เป็น messaging ในตัวเลย Chatbot = LINE Messaging API Webhook ตรงๆ</div>
+    <div class="mt-cell row-partial"><span class="status-pill s-partial">ได้แต่ต่างรูปแบบ</span></div>
+
+    <div class="mt-cell feature-name-cell row-lost">
+      เพื่อน (Friends)<div class="feature-file">friends.js</div>
+    </div>
+    <div class="mt-cell what-cell row-lost">Tab เพื่อนแนะนำ / เพื่อนของฉัน, เพิ่มเพื่อน, ค้นหา QR, เปิด friend-profile</div>
+    <div class="mt-cell how-cell row-lost">Line OA ไม่มี social graph ของตัวเอง ต้องทำ LIFF + backend ทั้งหมด หรือตัดฟีเจอร์นี้ออก</div>
+    <div class="mt-cell row-lost"><span class="status-pill s-lost">หายไป</span></div>
+
+    <div class="mt-cell feature-name-cell row-partial">
+      โปรไฟล์<div class="feature-file">profile.js</div>
+    </div>
+    <div class="mt-cell what-cell row-partial">Avatar, สถานะ, metric bubble, ติดต่อด่วน, Activity Preferences ลัด, Logout</div>
+    <div class="mt-cell how-cell row-partial">Flex Card ดูข้อมูลได้ แต่ cycleStatus / logout ต้องเปิด LIFF, ติดต่อด่วน = URI tel:</div>
+    <div class="mt-cell row-partial"><span class="status-pill s-partial">LIFF บางส่วน</span></div>
+
+    <div class="mt-cell feature-name-cell row-partial">
+      Activity Preferences<div class="feature-file">activity-preferences.js</div>
+    </div>
+    <div class="mt-cell what-cell row-partial">Segment buttons ระยะทาง/สถานที่/กลุ่ม/เวลา, บันทึก → AsyncStorage</div>
+    <div class="mt-cell how-cell row-partial">ต้องเป็น LIFF form ทั้งหมด แต่ reuse โค้ดเดิมได้ ~80% เปลี่ยนแค่ storage → API call</div>
+    <div class="mt-cell row-partial"><span class="status-pill s-partial">LIFF (reuse ได้)</span></div>
+
+    <div class="mt-cell feature-name-cell row-lost">
+      สร้างกิจกรรม<div class="feature-file">create.js</div>
+    </div>
+    <div class="mt-cell what-cell row-lost">Placeholder (ยังไม่ implement)</div>
+    <div class="mt-cell how-cell row-lost">ยังไม่มีของเดิม ถ้าจะทำใน Line OA ต้องเป็น LIFF form เต็มรูปแบบ</div>
+    <div class="mt-cell row-lost"><span class="status-pill s-lost">ยังไม่มี (ทั้งคู่)</span></div>
+
+    <div class="mt-cell feature-name-cell row-lost">
+      โปรไฟล์เพื่อน<div class="feature-file">friend-profile.js</div>
+    </div>
+    <div class="mt-cell what-cell row-lost">Modal-style screen แสดง avatar, สถานะ, กิจกรรมร่วมกัน, streak</div>
+    <div class="mt-cell how-cell row-lost">ขึ้นอยู่กับ Friends system ถ้าทำ LIFF friends อาจเปิด LIFF page นี้ได้</div>
+    <div class="mt-cell row-lost"><span class="status-pill s-lost">ขึ้นอยู่กับ Friends</span></div>
+
+    <!-- === CAREGIVER === -->
+    <div class="mt-cell feature-name-cell row-full">
+      Safety Signals<div class="feature-file">caregiver/index.js</div>
+    </div>
+    <div class="mt-cell what-cell row-full">Badge สี ok/watch/alert พร้อม title+detail</div>
+    <div class="mt-cell how-cell row-full">Flex Bubble สีตาม level ส่ง Push Notification ได้ทันทีเมื่อ level เปลี่ยน</div>
+    <div class="mt-cell row-full"><span class="status-pill s-full">ย้ายได้เต็ม + ดีกว่า</span></div>
+
+    <div class="mt-cell feature-name-cell row-full">
+      กิจกรรม 7 วัน + ผู้ร่วม<div class="feature-file">caregiver/index.js</div>
+    </div>
+    <div class="mt-cell what-cell row-full">List กิจกรรม, participant chips, badge เพื่อนในระบบ, expand/collapse</div>
+    <div class="mt-cell how-cell row-full">Flex Carousel 1 card ต่อ 1 กิจกรรม แสดง participants ได้ แต่ expand → LIFF</div>
+    <div class="mt-cell row-full"><span class="status-pill s-full">ย้ายได้เต็ม</span></div>
+
+    <div class="mt-cell feature-name-cell row-partial">
+      Loneliness Score + Bar<div class="feature-file">caregiver/index.js</div>
+    </div>
+    <div class="mt-cell what-cell row-partial">Progress bar แบบ dynamic, score text, label สี, computeLonelinessScore()</div>
+    <div class="mt-cell how-cell row-partial">Flex Message ส่ง score เป็น text+emoji ได้ แต่ animated bar ต้องใช้ LIFF</div>
+    <div class="mt-cell row-partial"><span class="status-pill s-partial">Static text / LIFF</span></div>
+
+    <div class="mt-cell feature-name-cell row-partial">
+      Activity Stats Bar Chart<div class="feature-file">caregiver/index.js</div>
+    </div>
+    <div class="mt-cell what-cell row-partial">Bar chart % ประเภทกิจกรรม, top category highlight</div>
+    <div class="mt-cell how-cell row-partial">Flex ส่ง % text ได้ แต่ visual bar chart ต้องเปิด LIFF + recharts</div>
+    <div class="mt-cell row-partial"><span class="status-pill s-partial">LIFF สำหรับ chart</span></div>
+
+    <div class="mt-cell feature-name-cell row-full">
+      ติดต่อด่วน + 1669<div class="feature-file">caregiver/index.js</div>
+    </div>
+    <div class="mt-cell what-cell row-full">ปุ่มโทรหาผู้สูงอายุ, ปุ่ม 1669</div>
+    <div class="mt-cell how-cell row-full">Flex Button + URI Action "tel:0812345678" กดแล้วโทรได้เลย</div>
+    <div class="mt-cell row-full"><span class="status-pill s-full">ย้ายได้เต็ม</span></div>
+
+    <div class="mt-cell feature-name-cell row-full">
+      LonelinessProvider Engine<div class="feature-file">providers.js + loneliness.js</div>
+    </div>
+    <div class="mt-cell what-cell row-full">trackAppOpen, computeScore, 30min interval, AppState listener</div>
+    <div class="mt-cell how-cell row-full">ย้ายไปรัน server-side (Node.js) อ่านจาก DB แทน AsyncStorage</div>
+    <div class="mt-cell row-full"><span class="status-pill s-full">ย้ายได้ (เปลี่ยน platform)</span></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════ -->
+<!-- SECTION 2: WHAT'S LOST        -->
+<!-- ══════════════════════════════ -->
+<div class="section">
+  <div class="section-head">
+    <div class="section-num">2</div>
+    <div class="section-title">ฟังก์ชันที่หายไป — และจะแก้อย่างไร</div>
+    <div class="section-tag">5 ฟีเจอร์หลัก</div>
+  </div>
+  <div class="lost-grid">
+
+    <div class="lost-card">
+      <div class="lost-card-title">❌ Email / Password Auth</div>
+      <div class="lost-card-file">login.js · signup.js · AuthProvider</div>
+      <div class="lost-card-why">Line OA ไม่มี email login — ทุกคนเข้าผ่าน LINE Account อย่างเดียว, Supabase signInWithPassword ใช้ไม่ได้</div>
+      <div class="lost-card-alt">ใช้ LINE Login OAuth 2.0 + backend ตรวจ userId → สร้าง session เอง หรือต่อ Supabase ด้วย custom JWT</div>
+    </div>
+
+    <div class="lost-card">
+      <div class="lost-card-title">❌ Friends Social Graph</div>
+      <div class="lost-card-file">friends.js · friend-profile.js</div>
+      <div class="lost-card-why">Line OA ไม่มี concept "friend list" ในแอป ไม่รู้ว่าใคร follow OA บ้าง ไม่มี QR add friend ระหว่าง user, ไม่มี recommendedFriends API</div>
+      <div class="lost-card-alt">ต้องสร้าง friends table ใน backend เอง ให้ user เพิ่มเพื่อนผ่าน LIFF แล้ว match ด้วย LINE userId</div>
+    </div>
+
+    <div class="lost-card">
+      <div class="lost-card-title">❌ Interactive UI State</div>
+      <div class="lost-card-file">useState ทุกหน้า · expand/collapse · cycleStatus</div>
+      <div class="lost-card-why">Flex Message เป็น static — กดปุ่มได้ แต่ render ใหม่ไม่ได้ ไม่มี useState, accordion toggle, animated transitions ทั้งหมดหายไป</div>
+      <div class="lost-card-alt">ส่ง Flex ใหม่ทุกครั้งที่ state เปลี่ยน (reply/push) หรือเปิด LIFF ที่ reuse React code เดิมได้</div>
+    </div>
+
+    <div class="lost-card">
+      <div class="lost-card-title">❌ AsyncStorage Local Preferences</div>
+      <div class="lost-card-file">aiProfileStore.js · loneliness.js (keys)</div>
+      <div class="lost-card-why">LINE OA ไม่มี local storage ใน chat context, AsyncStorage ใช้ได้ใน LIFF เท่านั้น แต่ไม่ persistent ข้าม session, Behavior tracking จาก device หายหมด</div>
+      <div class="lost-card-alt">ย้าย preferences + behavior log ไป Supabase DB, track จาก server events แทน</div>
+    </div>
+
+    <div class="lost-card">
+      <div class="lost-card-title">❌ Tab Bar Navigation</div>
+      <div class="lost-card-file">(tabs)/_layout.js · expo-router Stack</div>
+      <div class="lost-card-why">React Navigation / Expo Router ทำงานในแอปเท่านั้น ไม่มีใน Line chat context การนำทางระหว่าง screen ทำในลักษณะเดียวกันไม่ได้</div>
+      <div class="lost-card-alt">Rich Menu 6 ปุ่มแทน Tab Bar, Postback text นำทาง, LIFF pages แยก URL ต่อ "screen"</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════ -->
+<!-- SECTION 3: ARCHITECTURE SPLIT -->
+<!-- ══════════════════════════════ -->
+<div class="section">
+  <div class="section-head">
+    <div class="section-num">3</div>
+    <div class="section-title">Architecture แบ่งส่วน — แอปเดิม vs Line OA</div>
+  </div>
+  <div class="arch-split">
+
+    <!-- APP COLUMN -->
+    <div>
+      <div class="arch-col-title arch-col-app">📱 แอปมือถือ (ปัจจุบัน)</div>
+
+      <div class="arch-block ab-app">
+        <div class="arch-block-label">UI LAYER — React Native</div>
+        <div class="arch-block-title">Tab Bar + Stack Navigation</div>
+        <div class="arch-block-desc">Expo Router, bottom tabs, transitions, ScrollView</div>
+      </div>
+      <div class="arch-block ab-app">
+        <div class="arch-block-label">STATE — React Context</div>
+        <div class="arch-block-title">AuthProvider + LonelinessProvider</div>
+        <div class="arch-block-desc">useState, useEffect, useCallback, AppState listener</div>
+      </div>
+      <div class="arch-block ab-app">
+        <div class="arch-block-label">STORAGE — LOCAL</div>
+        <div class="arch-block-title">AsyncStorage</div>
+        <div class="arch-block-desc">Behavior tracking, activity preferences, previous score</div>
+      </div>
+      <div class="arch-block ab-app">
+        <div class="arch-block-label">AUTH</div>
+        <div class="arch-block-title">Email + Password</div>
+        <div class="arch-block-desc">Supabase signInWithPassword(), RouteGuard redirect</div>
+      </div>
+      <div class="arch-block ab-app">
+        <div class="arch-block-label">BACKEND</div>
+        <div class="arch-block-title">Supabase (DB + Storage + Edge Fn)</div>
+        <div class="arch-block-desc">profiles table, avatars bucket, chatbot function</div>
+      </div>
+    </div>
+
+    <!-- ARROW -->
+    <div class="arch-arrow-col">
+      <span>→</span>
+      <span>→</span>
+      <span>→</span>
+      <span>→</span>
+      <span>→</span>
+    </div>
+
+    <!-- LINE OA COLUMN -->
+    <div>
+      <div class="arch-col-title arch-col-line">💬 Line OA (ใหม่)</div>
+
+      <div class="arch-block ab-line">
+        <div class="arch-block-label">MESSAGING — Flex Message</div>
+        <div class="arch-block-title">Flex Card / Carousel / Bubble</div>
+        <div class="arch-block-desc">JSON-based UI ส่งผ่าน Messaging API, static UI</div>
+      </div>
+      <div class="arch-block ab-liff">
+        <div class="arch-block-label">INTERACTIVE — LIFF App</div>
+        <div class="arch-block-title">React Web App (reuse ~60%)</div>
+        <div class="arch-block-desc">LIFF SDK, เปิดใน LINE browser, ใช้ React state ได้ปกติ</div>
+      </div>
+      <div class="arch-block ab-shared">
+        <div class="arch-block-label">STORAGE — SERVER</div>
+        <div class="arch-block-title">Supabase DB (ย้ายจาก AsyncStorage)</div>
+        <div class="arch-block-desc">behavior_logs table, user_preferences, score_history</div>
+      </div>
+      <div class="arch-block ab-line">
+        <div class="arch-block-label">AUTH</div>
+        <div class="arch-block-title">LINE Login OAuth</div>
+        <div class="arch-block-desc">userId จาก LINE token, custom JWT → Supabase</div>
+      </div>
+      <div class="arch-block ab-new">
+        <div class="arch-block-label">NEW — WEBHOOK SERVER</div>
+        <div class="arch-block-title">Node.js / Express Webhook</div>
+        <div class="arch-block-desc">รับ events จาก LINE, ส่ง Flex กลับ, trigger push notifications</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════ -->
+<!-- SECTION 4: PROS & CONS        -->
+<!-- ══════════════════════════════ -->
+<div class="section">
+  <div class="section-head">
+    <div class="section-num">4</div>
+    <div class="section-title">ข้อดี vs ข้อเสีย — เปรียบเทียบตรงๆ</div>
+  </div>
+  <div class="pros-cons-wrap">
+
+    <!-- PROS -->
+    <div class="pros-col">
+      <div class="pc-header">✅ ข้อดีของ Line OA</div>
+
+      <div class="pc-item">
+        <div class="pc-icon">👥</div>
+        <div class="pc-text">
+          <strong>User acquisition = 0 ต้นทุน</strong>
+          <p>คนไทยมี LINE อยู่แล้ว 90%+ ไม่ต้องให้ผู้สูงอายุ download แอปใหม่ ลดอุปสรรคการใช้งานลงอย่างมาก</p>
+        </div>
+      </div>
+
+      <div class="pc-item">
+        <div class="pc-icon">🔔</div>
+        <div class="pc-text">
+          <strong>Push Notification จริง ไม่ต้องขอ permission</strong>
+          <p>ส่ง safety alert ถึงลูกหลานได้ทันที ไม่มี opt-in permission ซับซ้อน ไม่หลุด notification ไม่ต้องเปิดแอป</p>
+        </div>
+      </div>
+
+      <div class="pc-item">
+        <div class="pc-icon">💬</div>
+        <div class="pc-text">
+          <strong>Chatbot ใน native environment</strong>
+          <p>messages.js ต้องสร้าง chat UI เอง แต่ใน Line OA การแชทเป็น native feature พิมพ์คำสั่งได้เลยโดยไม่ต้องเปิด tab</p>
+        </div>
+      </div>
+
+      <div class="pc-item">
+        <div class="pc-icon">📊</div>
+        <div class="pc-text">
+          <strong>Rich Menu = Tab Bar ฟรี ไม่ต้อง code</strong>
+          <p>วางปุ่ม 6 ช่องใต้หน้าจอแชท ทดแทน _layout.js tab bar ได้เลย ไม่ต้องเขียน UI เอง</p>
+        </div>
+      </div>
+
+      <div class="pc-item">
+        <div class="pc-icon">📢</div>
+        <div class="pc-text">
+          <strong>Broadcast / Segment messaging</strong>
+          <p>ส่งข้อมูลสรุปกิจกรรมรายสัปดาห์หาลูกหลานหลายคนพร้อมกัน แยก segment ตาม role ได้</p>
+        </div>
+      </div>
+
+      <div class="pc-item">
+        <div class="pc-icon">⚡</div>
+        <div class="pc-text">
+          <strong>Backend logic ย้ายได้เกือบทั้งหมด</strong>
+          <p>Supabase, Loneliness Engine, AI scoring ใช้ได้เหมือนเดิม ย้ายแค่ UI layer ไม่ต้องเขียน business logic ใหม่</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONS -->
+    <div class="cons-col">
+      <div class="pc-header">❌ ข้อเสียของ Line OA</div>
+
+      <div class="pc-item">
+        <div class="pc-icon">🎨</div>
+        <div class="pc-text">
+          <strong>UX ถูกจำกัดด้วย Flex Message</strong>
+          <p>ทุก UI ที่สวยงามใน ActivityCard, animation, WarmClearTheme ทั้งหมดไม่ได้ใช้ Flex Message มีแค่ text / image / button เท่านั้น</p>
+        </div>
+      </div>
+
+      <div class="pc-item">
+        <div class="pc-icon">🔄</div>
+        <div class="pc-text">
+          <strong>Social graph ต้องสร้างใหม่ทั้งหมด</strong>
+          <p>friends.js, friend-profile.js ทั้งหมดต้องเขียนใหม่ Line OA ไม่มี friends concept ไม่รู้ว่าใคร follow OA บ้าง</p>
+        </div>
+      </div>
+
+      <div class="pc-item">
+        <div class="pc-icon">📱</div>
+        <div class="pc-text">
+          <strong>LIFF มี friction สูง</strong>
+          <p>ทุกครั้งที่ต้องการ interactive UI ต้องเปิด LIFF (มีหน้าจอ loading เพิ่ม) ผู้สูงอายุอาจสับสน ไม่ seamless เหมือนแอป native</p>
+        </div>
+      </div>
+
+      <div class="pc-item">
+        <div class="pc-icon">📡</div>
+        <div class="pc-text">
+          <strong>Behavior tracking แม่นยำน้อยลง</strong>
+          <p>loneliness.js ติด track session duration จาก AppState ไม่ได้ใน Line context, trackAppOpen/trackSessionEnd ต้องเปลี่ยนวิธีเก็บข้อมูลทั้งหมด</p>
+        </div>
+      </div>
+
+      <div class="pc-item">
+        <div class="pc-icon">🔐</div>
+        <div class="pc-text">
+          <strong>Auth เปลี่ยนทั้งระบบ</strong>
+          <p>AuthProvider ทั้งหมด (signInWithPassword, signUp, RouteGuard) ต้องเขียนใหม่หมด แทนด้วย LINE Login flow ที่ซับซ้อนกว่า</p>
+        </div>
+      </div>
+
+      <div class="pc-item">
+        <div class="pc-icon">💰</div>
+        <div class="pc-text">
+          <strong>ค่าใช้จ่าย LINE Messaging API</strong>
+          <p>Free tier มีจำกัด (1,000 messages/เดือน), ถ้า push notification บ่อยๆ ค่า message เพิ่มขึ้นตามจำนวน user</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════ -->
+<!-- SECTION 5: TECH STACK DIFF    -->
+<!-- ══════════════════════════════ -->
+<div class="section">
+  <div class="section-head">
+    <div class="section-num">5</div>
+    <div class="section-title">Tech Stack เปรียบเทียบ</div>
+  </div>
+  <div class="tech-compare">
+    <div class="tech-col tech-col-app">
+      <div class="tech-col-title">📱 แอปปัจจุบัน</div>
+      <div class="tech-item ti-remove"><div class="ti-dot" style="background:var(--red)"></div>React Native / Expo</div>
+      <div class="tech-item ti-remove"><div class="ti-dot" style="background:var(--red)"></div>expo-router (navigation)</div>
+      <div class="tech-item ti-remove"><div class="ti-dot" style="background:var(--red)"></div>expo-linear-gradient</div>
+      <div class="tech-item ti-remove"><div class="ti-dot" style="background:var(--red)"></div>AsyncStorage (local)</div>
+      <div class="tech-item ti-remove"><div class="ti-dot" style="background:var(--red)"></div>Supabase Auth (email)</div>
+      <div class="tech-item ti-remove"><div class="ti-dot" style="background:var(--red)"></div>expo-image-picker</div>
+      <div class="tech-item ti-keep"><div class="ti-dot" style="background:var(--green)"></div>Supabase DB (profiles, activities)</div>
+      <div class="tech-item ti-keep"><div class="ti-dot" style="background:var(--green)"></div>Supabase Storage (avatars)</div>
+      <div class="tech-item ti-keep"><div class="ti-dot" style="background:var(--green)"></div>Supabase Edge Functions</div>
+      <div class="tech-item ti-keep"><div class="ti-dot" style="background:var(--green)"></div>Loneliness Engine logic</div>
+      <div class="tech-item ti-keep"><div class="ti-dot" style="background:var(--green)"></div>Activity scoring algorithm</div>
+    </div>
+    <div class="tech-col tech-col-line">
+      <div class="tech-col-title">💬 Line OA ใหม่</div>
+      <div class="tech-item ti-new"><div class="ti-dot" style="background:var(--purple)"></div>LINE Messaging API</div>
+      <div class="tech-item ti-new"><div class="ti-dot" style="background:var(--purple)"></div>Flex Message JSON</div>
+      <div class="tech-item ti-new"><div class="ti-dot" style="background:var(--purple)"></div>LIFF SDK (React Web)</div>
+      <div class="tech-item ti-new"><div class="ti-dot" style="background:var(--purple)"></div>Rich Menu API</div>
+      <div class="tech-item ti-new"><div class="ti-dot" style="background:var(--purple)"></div>Webhook (Node.js/Express)</div>
+      <div class="tech-item ti-new"><div class="ti-dot" style="background:var(--purple)"></div>LINE Login OAuth 2.0</div>
+      <div class="tech-item ti-shared"><div class="ti-dot" style="background:var(--blue)"></div>Supabase DB (+ behavior_logs table)</div>
+      <div class="tech-item ti-shared"><div class="ti-dot" style="background:var(--blue)"></div>Supabase Storage (ใช้ต่อได้)</div>
+      <div class="tech-item ti-shared"><div class="ti-dot" style="background:var(--blue)"></div>Supabase Edge Functions</div>
+      <div class="tech-item ti-shared"><div class="ti-dot" style="background:var(--blue)"></div>Loneliness Engine (ย้ายไป server)</div>
+      <div class="tech-item ti-shared"><div class="ti-dot" style="background:var(--blue)"></div>Activity scoring (ย้ายไป server)</div>
+    </div>
+  </div>
+  <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:14px;font-size:12px;font-weight:700;color:var(--gray)">
+    <span><span style="background:var(--red-soft);color:var(--red);padding:2px 8px;border-radius:5px;border:1px solid var(--red-border)">ลบออก</span> เขียนใหม่ / ไม่ใช้แล้ว</span>
+    <span><span style="background:var(--green-soft);color:var(--green);padding:2px 8px;border-radius:5px;border:1px solid var(--green-border)">คงไว้</span> ใช้ต่อได้เลย</span>
+    <span><span style="background:var(--purple-soft);color:var(--purple);padding:2px 8px;border-radius:5px;border:1px solid var(--purple-border)">ใหม่</span> เพิ่มเข้ามา</span>
+    <span><span style="background:var(--blue-soft);color:var(--blue);padding:2px 8px;border-radius:5px;border:1px solid var(--blue-border)">ร่วมกัน</span> ปรับเล็กน้อย ใช้ได้ทั้ง 2 แบบ</span>
+  </div>
+</div>
+
+<!-- ══════════════════════════════ -->
+<!-- SECTION 6: STRATEGY           -->
+<!-- ══════════════════════════════ -->
+<div class="strategy-wrap">
+  <div class="strategy-title">🗺️ แนวทางที่แนะนำ — Hybrid Strategy (3 Phase)</div>
+  <div class="strategy-phases">
+    <div class="phase-card">
+      <div class="phase-num">PHASE 1 · เริ่มต้น</div>
+      <div class="phase-title">Line OA เป็น Notification Layer</div>
+      <ul class="phase-items">
+        <li>ส่ง Safety Signal push ทุกครั้งที่ level เปลี่ยน</li>
+        <li>ส่ง Flex Card สรุปกิจกรรมรายวัน/สัปดาห์</li>
+        <li>Rich Menu: ดูรายงาน / โทรด่วน / ประวัติ</li>
+        <li>Webhook รับคำสั่งข้อความ "สถานะวันนี้"</li>
+        <li>แอปเดิมยังทำงานควบคู่กันไป</li>
+      </ul>
+    </div>
+    <div class="phase-card">
+      <div class="phase-num">PHASE 2 · ขยาย</div>
+      <div class="phase-title">LIFF สำหรับ Interactive</div>
+      <ul class="phase-items">
+        <li>LIFF: Activity Preferences (reuse 80%)</li>
+        <li>LIFF: Loneliness Score Dashboard + Chart</li>
+        <li>LIFF: สมัครสมาชิก / ตั้งค่า Profile</li>
+        <li>LIFF: Create Activity form</li>
+        <li>Behavior tracking ย้ายไป server-side</li>
+      </ul>
+    </div>
+    <div class="phase-card">
+      <div class="phase-num">PHASE 3 · เต็มรูปแบบ</div>
+      <div class="phase-title">Full Line OA Experience</div>
+      <ul class="phase-items">
+        <li>LIFF Friends system + social graph</li>
+        <li>Chatbot AI ผ่าน Webhook โดยตรง (ไม่ต้องเปิด tab)</li>
+        <li>LINE Login แทน email auth ทั้งหมด</li>
+        <li>Broadcast segment ตาม risk level</li>
+        <li>พิจารณาลด native app ถ้า user adoption ดีพอ</li>
+      </ul>
+    </div>
+    <div class="phase-card">
+      <div class="phase-num">สิ่งที่ควรเก็บไว้ในแอป native</div>
+      <div class="phase-title">ยังต้องการแอป</div>
+      <ul class="phase-items">
+        <li>ActivityCard UI ที่สวยงาม / branded</li>
+        <li>Real-time session tracking (AppState)</li>
+        <li>Push notification แบบ native (APNs/FCM)</li>
+        <li>Offline-first experience</li>
+        <li>Full camera/image picker access</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div style="text-align:center;font-size:11px;font-weight:700;color:var(--gray);margin-top:20px">
+  GoodNeighbor · LINE OA Adaptation Analysis · 11 screens · Feb 2026
+</div>
+
+</body>
+</html>
