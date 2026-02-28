@@ -2,6 +2,7 @@ export const currentUser = {
   id: '1',
   name: 'คุณสมชาย ใจดี',
   age: 65,
+  gender: 'male', // 'male' = ครับ, 'female' = ค่ะ
   avatar: '👨‍🦳',
   location: {
     district: 'เขตบางกะปิ',

@@ -1,5 +1,6 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import {
+  Image,
   Modal,
   Pressable,
   ScrollView,
@@ -13,7 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import ActivityCard from '../../components/ActivityCard';
-import { activities, categories } from '../../data/mockData';
+import { activities, categories, currentUser } from '../../data/mockData';
 import { WarmClearTheme } from '../../theme';
 
 import {
@@ -27,22 +28,22 @@ const THAI_DAYS = ['อาทิตย์', 'จันทร์', 'อังค�
 
 // วันหยุดและวันสำคัญไทย (MM-DD)
 const THAI_SPECIAL_DAYS = {
-  '01-01': 'วันขึ้นปีใหม่ 🎊',
-  '02-14': 'วันวาเลนไทน์ 💝',
-  '04-06': 'วันจักรี 👑',
-  '04-13': 'วันสงกรานต์ 💦',
-  '04-14': 'วันสงกรานต์ 💦',
-  '04-15': 'วันสงกรานต์ 💦',
-  '05-01': 'วันแรงงานแห่งชาติ 👷',
-  '05-05': 'วันฉัตรมงคล 👑',
-  '06-03': 'วันเฉลิมพระชนมพรรษาสมเด็จพระราชินี 👸',
-  '07-28': 'วันเฉลิมพระชนมพรรษา ร.10 🎂',
-  '08-12': 'วันแม่แห่งชาติ 👩',
-  '10-13': 'วันคล้ายวันสวรรคต ร.9 🙏',
-  '10-23': 'วันปิยมหาราช 🙏',
-  '12-05': 'วันพ่อแห่งชาติ 👨',
-  '12-10': 'วันรัฐธรรมนูญ 📜',
-  '12-31': 'วันสิ้นปี 🎆',
+  '01-01': 'วันขึ้นปีใหม่',
+  '02-14': 'วันวาเลนไทน์',
+  '04-06': 'วันจักรี',
+  '04-13': 'วันสงกรานต์',
+  '04-14': 'วันสงกรานต์',
+  '04-15': 'วันสงกรานต์',
+  '05-01': 'วันแรงงานแห่งชาติ',
+  '05-05': 'วันฉัตรมงคล',
+  '06-03': 'วันเฉลิมพระชนมพรรษาสมเด็จพระราชินี',
+  '07-28': 'วันเฉลิมพระชนมพรรษา ร.10',
+  '08-12': 'วันแม่แห่งชาติ',
+  '10-13': 'วันคล้ายวันสวรรคต ร.9',
+  '10-23': 'วันปิยมหาราช',
+  '12-05': 'วันพ่อแห่งชาติ',
+  '12-10': 'วันรัฐธรรมนูญ',
+  '12-31': 'วันสิ้นปี',
 };
 
 // วันพระ (8, 15, 23, 29/30 ของเดือนจันทรคติ — ประมาณด้วย offset)
@@ -53,19 +54,96 @@ function isWanPhra(date) {
   return diff % 7 === 0;
 }
 
+const THAI_MONTHS = [
+  'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
+  'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม',
+];
+
+// ── รูปภาพสำหรับวันพิเศษ (DEV mockup) ──
+// เพิ่ม key ให้ตรงกับ THAI_SPECIAL_DAYS แล้ว require รูปที่ต้องการ
+const SPECIAL_DAY_IMAGES = {
+  '08-12': require('../../assets/images/MotherDays.jpg'), // วันแม่
+  // '12-05': require('../../assets/images/FatherDay.jpg'),
+  // '01-01': require('../../assets/images/NewYear.jpg'),
+  // '04-13': require('../../assets/images/Songkran.jpg'),
+};
+
+// ── รูปภาพสำหรับวันปกติ แยกตามวันในสัปดาห์ ──
+// ลบ // หน้าวันที่มีรูปแล้ว วันที่ยังไม่มีรูปให้คง // ไว้ (ไม่งั้น build error)
+const NORMAL_DAY_IMAGES = {
+  // 0: require('../../assets/images/Sunday.jpg'),    // อาทิตย์
+  1: require('../../assets/images/Monday.jpg'),       // จันทร์
+  // 2: require('../../assets/images/Tuesday.jpg'),   // อังคาร
+  3: require('../../assets/images/Wednesday.jpg'), // พุธ
+  // 4: require('../../assets/images/Thursday.jpg'),  // พฤหัสบดี
+  // 5: require('../../assets/images/Friday.jpg'),    // ศุกร์
+  6: require('../../assets/images/Saturday.jpg'),     // เสาร์
+};
+
+
+// ── gradient สีตามวันในสัปดาห์ ──
+const DAY_GRADIENTS = {
+  0: ['#c084fc', '#9333ea', '#6b21a8'], // อาทิตย์ — ม่วง
+  1: ['#facc15', '#ca8a04', '#854d0e'], // จันทร์   — เหลือง
+  2: ['#f87171', '#dc2626', '#991b1b'], // อังคาร   — แดง
+  3: ['#4ade80', '#16a34a', '#14532d'], // พุธ      — เขียว
+  4: ['#fb923c', '#ea580c', '#9a3412'], // พฤหัส   — ส้ม
+  5: ['#60a5fa', '#2563eb', '#1e3a8a'], // ศุกร์    — ฟ้า
+  6: ['#e879f9', '#a21caf', '#701a75'], // เสาร์    — ม่วงชมพู
+};
+
+// ข้อความอวยพรสำหรับวันปกติ (สุ่มแสดง)
+const DAILY_BLESSINGS = [
+  'ขอให้วันนี้เป็นวันที่ดีและเต็มไปด้วยรอยยิ้มนะ',
+  'วันใหม่ โอกาสใหม่ ขอให้วันนี้สดใสนะ',
+  'ขอให้มีพลังงานดีๆ ตลอดทั้งวันเลย',
+  'วันนี้ขอให้ทุกอย่างราบรื่นและมีความสุขนะ',
+  'ยิ้มแย้มแจ่มใสไว้ วันนี้จะเป็นวันที่ดีแน่นอน',
+];
+
+function getDailyBlessing(date) {
+  const idx = date.getDate() % DAILY_BLESSINGS.length;
+  return DAILY_BLESSINGS[idx];
+}
+
+function getNextSpecialDay(now) {
+  const year = now.getFullYear();
+  let closest = null;
+  let closestDiff = Infinity;
+  for (const [key, label] of Object.entries(THAI_SPECIAL_DAYS)) {
+    const [mm, dd] = key.split('-').map(Number);
+    let candidate = new Date(year, mm - 1, dd);
+    if (candidate - now <= 0) candidate = new Date(year + 1, mm - 1, dd);
+    const diff = candidate - now;
+    if (diff < closestDiff) {
+      closestDiff = diff;
+      closest = { label, dd, month: THAI_MONTHS[mm - 1] };
+    }
+  }
+  return closest;
+}
+
 function getTodayInfo() {
-  const now = new Date();
+  // DEV: ลบ // เพื่อทดสอบวันพิเศษ
+  //const now = new Date('2025-08-12'); // วันแม่แห่งชาติ 👩
+  const now = new Date(); // ใช้วันจริงใน Production
   const dayName = THAI_DAYS[now.getDay()];
+  const dd = now.getDate();
+  const month = THAI_MONTHS[now.getMonth()];
+  const buddhistYear = now.getFullYear() + 543;
   const mm = String(now.getMonth() + 1).padStart(2, '0');
-  const dd = String(now.getDate()).padStart(2, '0');
-  const key = `${mm}-${dd}`;
+  const ddStr = String(dd).padStart(2, '0');
+  const key = `${mm}-${ddStr}`;
 
   let specialDay = THAI_SPECIAL_DAYS[key] || null;
-  if (!specialDay && isWanPhra(now)) {
-    specialDay = 'วันพระ 🙏';
-  }
+  if (!specialDay && isWanPhra(now)) specialDay = 'วันพระ 🙏';
 
-  return { dayName, specialDay };
+  const nextSpecial = !specialDay ? getNextSpecialDay(now) : null;
+
+  const blessing = !specialDay ? getDailyBlessing(now) : null;
+  const imageSource = SPECIAL_DAY_IMAGES[key] ?? NORMAL_DAY_IMAGES[now.getDay()] ?? null;
+  const dayOfWeek = now.getDay();
+  return { dayName, dd, month, buddhistYear, specialDay, nextSpecial, blessing, imageSource, dayOfWeek };
 }
 
 function getTodayString() {
@@ -77,7 +155,9 @@ export default function HomeScreen() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [checkedIn, setCheckedIn] = useState(false);
   const [popupVisible, setPopupVisible] = useState(false);
-  const { dayName, specialDay } = getTodayInfo();
+  const { dayName, dd, month, buddhistYear, specialDay, nextSpecial, blessing, imageSource, dayOfWeek } = getTodayInfo();
+  const polite = currentUser.gender === 'female' ? 'ค่ะ' : 'ครับ';
+  const firstName = currentUser.name.replace('คุณ', '').trim().split(' ')[0];
 
   // DEV MODE: แสดง popup ทุกครั้ง
   useEffect(() => {
@@ -104,7 +184,7 @@ export default function HomeScreen() {
     setPopupVisible(false);
     try {
       await AsyncStorage.setItem(STORAGE_KEY, getTodayString());
-    } catch (_) {}
+    } catch (_) { }
   };
 
   const handleCheckin = async () => {
@@ -113,13 +193,13 @@ export default function HomeScreen() {
     handleClosePopup();
     try {
       await trackCheckinSuccess();
-    } catch (_) {}
+    } catch (_) { }
   };
 
   const handleJoin = async (_activity) => {
     try {
       await trackActivityJoined();
-    } catch (_) {}
+    } catch (_) { }
   };
 
   const filteredActivities = useMemo(() => {
@@ -150,21 +230,47 @@ export default function HomeScreen() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
             <LinearGradient
-              colors={['#5ecfbf', '#3a9e8f', '#1f7a6e']}
+              colors={specialDay ? ['#e8a020', '#c47010', '#9a5000'] : DAY_GRADIENTS[dayOfWeek]}
               start={{ x: 0, y: 0 }}
               end={{ x: 0, y: 1 }}
               style={styles.modalGradient}
             >
-              <Text style={styles.modalTitleTop}>สวัสดีวัน{dayName}</Text>
-              <Text style={styles.modalTitleBottom}>วันนี้เป็นอย่างไรบ้าง?</Text>
+              {/* รูปภาพวันพิเศษ หรือรูปตามวันในสัปดาห์ */}
+              {imageSource ? (
+                <Image source={imageSource} style={styles.modalHeroImage} resizeMode="cover" />
+              ) : (
+                <View style={styles.modalImagePlaceholder} />
+              )}
+
+              <Text style={styles.modalTitleTop}>{dd} {month} พ.ศ. {buddhistYear}</Text>
+
               {specialDay ? (
-                <View style={styles.specialDayBadge}>
-                  <Text style={styles.specialDayText}>{specialDay}</Text>
-                </View>
-              ) : null}
-              <Text style={styles.modalSubtitle}>
-                กิจกรรมเด่นใกล้คุณ คัดมาเฉพาะละแวกนี้
-              </Text>
+                <>
+                  <Text style={styles.modalTitleBottom}>
+                    สวัสดีวัน{dayName}{polite} คุณ{firstName}
+                  </Text>
+                  <View style={styles.specialDayBadge}>
+                    <Text style={styles.specialDayText}>วันนี้เป็น{specialDay}</Text>
+                  </View>
+                </>
+              ) : (
+                <>
+                  <Text style={styles.modalTitleBottom}>
+                    สวัสดีวัน{dayName}{polite} คุณ{firstName}
+                  </Text>
+                  <View style={styles.specialDayBadge}>
+                    <Text style={styles.specialDayText}>{blessing}{polite} คุณ{firstName}</Text>
+                    {nextSpecial ? (
+                      <View style={styles.nextSpecialRow}>
+                        <View style={styles.nextSpecialBar} />
+                        <Text style={styles.nextSpecialText}>
+                          วันพิเศษใกล้สุด: {nextSpecial.label} — {nextSpecial.dd} {nextSpecial.month}
+                        </Text>
+                      </View>
+                    ) : null}
+                  </View>
+                </>
+              )}
 
               <Pressable
                 onPress={handleCheckin}
@@ -307,18 +413,54 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 0,
   },
-  specialDayBadge: {
-    alignSelf: 'flex-start',
-    backgroundColor: 'rgba(255,255,255,0.20)',
-    borderRadius: 20,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
+  modalImagePlaceholder: {
+    width: '100%',
+    height: 80,
+    borderRadius: 10,
+    backgroundColor: 'rgba(255,255,255,0.10)',
     marginBottom: 4,
   },
+  modalHeroImage: {
+    width: '100%',
+    height: 120,
+    borderRadius: 10,
+    marginBottom: 4,
+  },
+  specialDayBadge: {
+    alignSelf: 'stretch',
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    marginBottom: 4,
+    gap: 4,
+  },
   specialDayText: {
-    fontSize: 13,
+    fontSize: 15,
     fontWeight: '800',
     color: '#ffffff',
+  },
+  nextSpecialRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 6,
+    backgroundColor: 'rgba(0,0,0,0.20)',
+    borderRadius: 8,
+    paddingVertical: 7,
+    paddingHorizontal: 10,
+  },
+  nextSpecialBar: {
+    width: 3,
+    alignSelf: 'stretch',
+    borderRadius: 2,
+    backgroundColor: '#FFB347',
+  },
+  nextSpecialText: {
+    fontSize: 14,
+    fontWeight: '900',
+    color: '#FFB347',
+    flex: 1,
   },
   checkinBtnDone: {
     backgroundColor: '#d4a900',
