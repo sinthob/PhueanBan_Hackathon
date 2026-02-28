@@ -9,6 +9,7 @@ const categoryColors = {
   cooking: '#f59e0b',
   social: '#ec4899',
   volunteer: '#ef4444',
+  merit: '#f97316',
   learning: '#8b5cf6',
   entertainment: '#06b6d4',
 };
@@ -31,10 +32,14 @@ export default function ActivityCard({ activity, onJoin }) {
         )}
       </LinearGradient>
 
-      {/* Title + Difficulty */}
+      {/* Title + Mode Badge */}
       <View style={styles.titleRow}>
         <Text style={styles.title}>{activity.title}</Text>
-        <Text style={styles.timeText}>{activity.difficulty}</Text>
+        <View style={[styles.modeBadge, activity.mode === 'online' ? styles.modeBadgeOnline : styles.modeBadgeOnsite]}>
+          <Text style={[styles.modeBadgeText, activity.mode === 'online' ? styles.modeBadgeTextOnline : styles.modeBadgeTextOnsite]}>
+            {activity.mode === 'online' ? 'Online' : 'Onsite'}
+          </Text>
+        </View>
       </View>
 
       {/* Tags */}
@@ -117,12 +122,32 @@ const styles = StyleSheet.create({
     color: WarmClearTheme.colors.text,
     flex: 1,
   },
-  timeText: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: WarmClearTheme.colors.textSub,
-    textAlign: 'right',
+  modeBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 20,
     flexShrink: 0,
+    alignSelf: 'flex-start',
+  },
+  modeBadgeOnline: {
+    backgroundColor: '#d1fae5',
+    borderWidth: 1,
+    borderColor: '#10b981',
+  },
+  modeBadgeOnsite: {
+    backgroundColor: '#fdf2e4',
+    borderWidth: 1,
+    borderColor: '#E8340A',
+  },
+  modeBadgeText: {
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  modeBadgeTextOnline: {
+    color: '#065f46',
+  },
+  modeBadgeTextOnsite: {
+    color: '#e8800a',
   },
   tagRow: {
     flexDirection: 'row',
