@@ -37,13 +37,9 @@ function RouteGuard() {
 
     const role = profile?.role ?? null;
     if (!role) {
-      // Signup now collects role. If an older user logs in without a profiles row,
-      // avoid a separate onboarding screen; use user_metadata.role when available.
-      const metaRole = user?.user_metadata?.role ?? null;
-      if (metaRole === 'caregiver') {
-        if (!inCaregiver) router.replace('/caregiver');
-        return;
-      }
+      // Signup now collects role. If an older user logs in without a profile row,
+      // fall back to a safe default (elder) instead of showing a separate onboarding screen.
+      // NOTE: The AuthProvider also tries to auto-provision from user_metadata when available.
       if (!inTabs) router.replace('/(tabs)');
       return;
     }
@@ -60,7 +56,7 @@ function RouteGuard() {
         router.replace('/(tabs)');
       }
     }
-  }, [initialized, session, user?.user_metadata?.role, profile?.role, profileLoading, segments, router]);
+  }, [initialized, session, profile?.role, profileLoading, segments, router]);
 
   return null;
 }

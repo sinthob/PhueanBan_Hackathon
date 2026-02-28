@@ -60,7 +60,7 @@ function RouteGuard() {
         router.replace('/(tabs)');
       }
     }
-  }, [initialized, session, user?.user_metadata?.role, profile?.role, profileLoading, segments, router]);
+  }, [initialized, session, profile?.role, profileLoading, segments, router]);
 
   return null;
 }
