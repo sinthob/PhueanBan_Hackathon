@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View, Image } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import { WarmClearTheme } from '../theme';
@@ -19,43 +19,42 @@ export default function ActivityCard({ activity, onJoin }) {
 
   return (
     <View style={styles.card}>
+      {/* Hero Image */}
       <LinearGradient
         colors={[t.colors.cardGradientStart, t.colors.cardGradientEnd]}
         style={styles.hero}
       >
-        <Text style={styles.heroIcon}>{activity.icon}</Text>
+        {activity.image ? (
+          <Image source={activity.image} style={styles.heroImage} resizeMode="cover" />
+        ) : (
+          <Text style={styles.heroIcon}>{activity.icon}</Text>
+        )}
       </LinearGradient>
 
-      <View style={styles.headerRow}>
-        <View style={styles.headerBody}>
-          <Text style={styles.title}>{activity.title}</Text>
-          <View style={styles.tagRow}>
-            {activity.tags.map((tag, idx) => (
-              <View key={`${activity.id}-${idx}`} style={[styles.tag, { borderColor: tint }]}> 
-                <Text style={[styles.tagText, { color: tint }]}>{tag}</Text>
-              </View>
-            ))}
-          </View>
-        </View>
+      {/* Title + Difficulty */}
+      <View style={styles.titleRow}>
+        <Text style={styles.title}>{activity.title}</Text>
+        <Text style={styles.timeText}>{activity.difficulty}</Text>
       </View>
 
-      <View style={styles.keyInfoBox}>
-        <View style={styles.keyInfoRow}>
-          <View style={styles.keyInfoItem}>
-            <Text style={styles.keyLabel}>เวลา</Text>
-            <Text style={styles.keyValue}>{activity.time}</Text>
+      {/* Tags */}
+      <View style={styles.tagRow}>
+        {activity.tags.map((tag, idx) => (
+          <View key={`${activity.id}-${idx}`} style={[styles.tag, { borderColor: tint }]}>
+            <Text style={[styles.tagText, { color: tint }]}>{tag}</Text>
           </View>
-          <View style={styles.keyInfoItem}>
-            <Text style={styles.keyLabel}>สถานที่</Text>
-            <Text style={styles.keyValue}>
-              {activity.location} • {activity.distance}
-            </Text>
-          </View>
-        </View>
+        ))}
       </View>
 
+      {/* Description */}
       <Text style={styles.description}>{activity.description}</Text>
 
+      {/* Location */}
+      <View style={styles.locationBox}>
+        <Text style={styles.locationText}>📍 {activity.location} • {activity.distance}</Text>
+      </View>
+
+      {/* Participants + Time */}
       <View style={styles.secondaryInfoGrid}>
         <View style={styles.secondaryInfoItem}>
           <Text style={styles.secondaryLabel}>ผู้เข้าร่วม</Text>
@@ -64,21 +63,17 @@ export default function ActivityCard({ activity, onJoin }) {
           </Text>
         </View>
         <View style={styles.secondaryInfoItem}>
-          <Text style={styles.secondaryLabel}>ระดับ</Text>
-          <Text style={styles.secondaryValue}>{activity.difficulty}</Text>
+          <Text style={styles.secondaryLabel}>เวลา</Text>
+          <Text style={styles.secondaryValue}>{activity.time}</Text>
         </View>
       </View>
 
-      <View style={styles.organizerRow}>
-        <Text style={styles.organizerAvatar}>{activity.organizer.avatar}</Text>
-        <View>
-          <Text style={styles.organizerLabel}>ผู้จัด</Text>
-          <Text style={styles.organizerName}>{activity.organizer.name}</Text>
-        </View>
-      </View>
+      {/* Organizer (no avatar) */}
+      <Text style={styles.organizerText}>ผู้จัด: {activity.organizer.name}</Text>
 
+      {/* Join Button */}
       <Pressable style={styles.joinButton} onPress={() => onJoin(activity)}>
-        <Text style={styles.joinButtonText}>✓ ลงทะเบียนเข้าร่วม</Text>
+        <Text style={styles.joinButtonText}>ลงทะเบียนเข้าร่วม</Text>
       </Pressable>
     </View>
   );
@@ -105,75 +100,65 @@ const styles = StyleSheet.create({
   heroIcon: {
     fontSize: 64,
   },
-  headerRow: {
-    marginBottom: 12,
+  heroImage: {
+    width: '100%',
+    height: '100%',
   },
-  headerBody: {
-    flex: 1,
+  titleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 10,
+    gap: 8,
   },
   title: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: '900',
     color: WarmClearTheme.colors.text,
-    marginBottom: 6,
+    flex: 1,
+  },
+  timeText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: WarmClearTheme.colors.textSub,
+    textAlign: 'right',
+    flexShrink: 0,
   },
   tagRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 8,
+    marginBottom: 12,
   },
   tag: {
     borderWidth: 1,
     borderRadius: 14,
     paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingVertical: 6,
     backgroundColor: WarmClearTheme.colors.surface,
-    minHeight: 40,
     justifyContent: 'center',
   },
   tagText: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '800',
-  },
-  keyInfoBox: {
-    backgroundColor: WarmClearTheme.colors.primarySoft,
-    borderRadius: WarmClearTheme.radii.control,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: WarmClearTheme.colors.primarySoftBorder,
-    ...WarmClearTheme.shadows.subtle,
-    marginBottom: 12,
-  },
-  keyInfoRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-  },
-  keyInfoItem: {
-    width: '48%',
-  },
-  keyLabel: {
-    fontSize: 16,
-    color: WarmClearTheme.colors.text,
-    fontWeight: '900',
-    marginBottom: 4,
-  },
-  keyValue: {
-    fontSize: 18,
-    color: WarmClearTheme.colors.text,
-    fontWeight: '800',
-    lineHeight: 24,
   },
   description: {
-    fontSize: 18,
+    fontSize: 16,
     color: WarmClearTheme.colors.textSub,
-    marginBottom: 14,
-    lineHeight: 24,
+    marginBottom: 10,
+    lineHeight: 22,
+    fontWeight: '600',
+  },
+  locationBox: {
+    marginBottom: 12,
+  },
+  locationText: {
+    fontSize: 15,
     fontWeight: '700',
+    color: WarmClearTheme.colors.text,
   },
   secondaryInfoGrid: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     gap: 12,
     backgroundColor: WarmClearTheme.colors.surfaceSoft,
     borderRadius: WarmClearTheme.radii.control,
@@ -184,43 +169,23 @@ const styles = StyleSheet.create({
   },
   secondaryInfoItem: {
     flex: 1,
-    minWidth: '48%',
   },
   secondaryLabel: {
-    fontSize: 16,
+    fontSize: 14,
     color: WarmClearTheme.colors.text,
     marginBottom: 4,
     fontWeight: '900',
   },
   secondaryValue: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: WarmClearTheme.colors.text,
-    lineHeight: 24,
-  },
-  organizerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    backgroundColor: WarmClearTheme.colors.primarySoft,
-    borderRadius: WarmClearTheme.radii.control,
-    padding: 12,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: WarmClearTheme.colors.primarySoftBorder,
-  },
-  organizerAvatar: {
-    fontSize: 24,
-  },
-  organizerLabel: {
     fontSize: 16,
-    color: WarmClearTheme.colors.text,
-    fontWeight: '900',
-  },
-  organizerName: {
-    fontSize: 18,
     fontWeight: '800',
     color: WarmClearTheme.colors.text,
+  },
+  organizerText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: WarmClearTheme.colors.textSub,
+    marginBottom: 12,
   },
   joinButton: {
     backgroundColor: WarmClearTheme.colors.accent,
@@ -234,6 +199,6 @@ const styles = StyleSheet.create({
   joinButtonText: {
     fontSize: 18,
     fontWeight: '900',
-    color: WarmClearTheme.colors.accentText,
+    color: '#000000',
   },
 });
