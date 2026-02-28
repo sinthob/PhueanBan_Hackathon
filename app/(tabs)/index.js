@@ -18,6 +18,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import ActivityCard from '../../components/ActivityCard';
 import { activities, categories, currentUser } from '../../data/mockData';
 import { getActivityProfile } from '../../data/aiProfileStore';
+import { getUserActivities, subscribeUserActivities } from '../../data/userActivitiesStore';
 import { WarmClearTheme } from '../../theme';
 
 // ── AI helpers (ย้ายมาจาก discover.js) ──
@@ -245,6 +246,7 @@ export default function HomeScreen() {
   const [aiPrompt, setAiPrompt] = useState('');
   const [aiLoading, setAiLoading] = useState(false);
   const [aiResults, setAiResults] = useState([]);
+  const [userActivities, setUserActivities] = useState(() => getUserActivities());
   const { dayName, dd, month, buddhistYear, specialDay, nextSpecial, blessing, imageSource, dayOfWeek } = getTodayInfo();
   const polite = currentUser.gender === 'female' ? 'ค่ะ' : 'ครับ';
   const firstName = currentUser.name.replace('คุณ', '').trim().split(' ')[0];
@@ -252,6 +254,12 @@ export default function HomeScreen() {
   // DEV MODE: แสดง popup ทุกครั้ง
   useEffect(() => {
     setPopupVisible(true); // comment บรรทัดนี้ไว้ถ้าเปิดใช้ Production
+  }, []);
+
+  // Subscribe to user-created activities
+  useEffect(() => {
+    const unsub = subscribeUserActivities((updated) => setUserActivities([...updated]));
+    return unsub;
   }, []);
 
   // PRODUCTION: แสดง popup ครั้งเดียวต่อวัน
@@ -509,6 +517,13 @@ export default function HomeScreen() {
             </Text>
             {!showFiltered ? <Text style={styles.sectionLink}>ดูทั้งหมด</Text> : null}
           </View>
+          {/* กิจกรรมที่ผู้ใช้สร้างเอง — แสดงบนสุดเสมอ */}
+          {!showFiltered && userActivities.length > 0 ? (
+            userActivities.map((activity) => (
+              <ActivityCard key={activity.id} activity={activity} onJoin={handleJoin} isOwner={true} />
+            ))
+          ) : null}
+
           {visibleActivities.length ? (
             visibleActivities.map((activity) => (
               <ActivityCard key={activity.id} activity={activity} onJoin={handleJoin} />

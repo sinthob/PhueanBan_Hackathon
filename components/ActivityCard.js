@@ -23,7 +23,7 @@ const categoryColors = {
   entertainment: '#06b6d4',
 };
 
-export default function ActivityCard({ activity, onJoin }) {
+export default function ActivityCard({ activity, onJoin, isOwner = false }) {
   const [detailVisible, setDetailVisible] = useState(false);
   const [registered, setRegistered]       = useState(false);
   const t    = WarmClearTheme;
@@ -38,7 +38,7 @@ export default function ActivityCard({ activity, onJoin }) {
   return (
     <>
       {/* ── MINIMAL CARD — กดที่ไหนก็ได้เพื่อดูรายละเอียด ── */}
-      <Pressable style={styles.card} onPress={() => setDetailVisible(true)}>
+      <Pressable style={[styles.card, isOwner && styles.cardOwner]} onPress={() => setDetailVisible(true)}>
         {/* Hero Image */}
         <LinearGradient
           colors={[t.colors.cardGradientStart, t.colors.cardGradientEnd]}
@@ -50,6 +50,14 @@ export default function ActivityCard({ activity, onJoin }) {
             <Text style={styles.heroIcon}>{activity.icon}</Text>
           )}
         </LinearGradient>
+
+        {/* Owner badge */}
+        {isOwner ? (
+          <View style={styles.ownerBadge}>
+            <Ionicons name="star" size={14} color="#92400e" />
+            <Text style={styles.ownerBadgeText}>กิจกรรมของฉัน</Text>
+          </View>
+        ) : null}
 
         {/* Title + Mode Badge */}
         <View style={styles.titleRow}>
@@ -185,6 +193,29 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: WarmClearTheme.colors.border,
     ...WarmClearTheme.shadows.card,
+  },
+  cardOwner: {
+    borderWidth: 2,
+    borderColor: '#F59E0B',
+    backgroundColor: '#FFFBEB',
+  },
+  ownerBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    alignSelf: 'flex-start',
+    backgroundColor: '#FEF3C7',
+    borderWidth: 1,
+    borderColor: '#F59E0B',
+    borderRadius: 20,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    marginBottom: 8,
+  },
+  ownerBadgeText: {
+    fontSize: 13,
+    fontWeight: '900',
+    color: '#92400e',
   },
   hero: {
     height: 132,
