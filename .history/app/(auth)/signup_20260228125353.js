@@ -39,29 +39,6 @@ function RadioOption({ label, active, onPress }) {
   );
 }
 
-function ResultPanel({ variant, title, message, primaryAction, secondaryAction }) {
-  const isError = variant === 'error';
-  return (
-    <View
-      accessibilityRole="alert"
-      style={[
-        styles.resultPanel,
-        isError ? styles.resultPanelError : styles.resultPanelSuccess,
-      ]}
-    >
-      <Text style={[styles.resultTitle, isError ? styles.resultTitleError : styles.resultTitleSuccess]}>
-        {title}
-      </Text>
-      {message ? <Text style={styles.resultMessage}>{message}</Text> : null}
-
-      <View style={styles.resultActionsRow}>
-        {primaryAction}
-        {secondaryAction}
-      </View>
-    </View>
-  );
-}
-
 const HEALTH_OPTIONS = [
   { label: 'ไม่ระบุ', value: 'none' },
   { label: 'หัวใจและหลอดเลือด', value: 'cardiovascular' },
@@ -112,7 +89,6 @@ export default function SignupScreen() {
   const [healthDropdownOpen, setHealthDropdownOpen] = useState(false);
   const [activityInterests, setActivityInterests] = useState([]);
   const [submitting, setSubmitting] = useState(false);
-  const [submitResult, setSubmitResult] = useState(null);
 
   const availableActivityCategories = useMemo(
     () => categories.filter((c) => c.value !== 'all'),
@@ -155,8 +131,6 @@ export default function SignupScreen() {
   };
 
   const onSignup = async () => {
-    setSubmitResult(null);
-
     const trimmedEmail = email.trim();
     const trimmedProfileName = profileName.trim();
 
@@ -248,26 +222,14 @@ export default function SignupScreen() {
 
       // Depending on Supabase settings, user may need email confirmation.
       if (!data?.session) {
-        setSubmitResult({
-          status: 'success',
-          title: 'สมัครสำเร็จ',
-          message:
-            'กรุณายืนยันอีเมลก่อนเข้าสู่ระบบ (ถ้าระบบเปิดยืนยันอีเมล)\n\nหมายเหตุ: รูปโปรไฟล์จะอัปโหลดได้หลังเข้าสู่ระบบแล้ว',
-        });
-      } else {
-        setSubmitResult({
-          status: 'success',
-          title: 'สมัครสำเร็จ',
-          message: 'สร้างบัญชีเรียบร้อย กำลังพาเข้าสู่ระบบ…',
-        });
+        Alert.alert(
+          'สมัครสำเร็จ',
+          'กรุณายืนยันอีเมลก่อนเข้าสู่ระบบ (ถ้าระบบเปิดยืนยันอีเมล)\n\nหมายเหตุ: รูปโปรไฟล์จะอัปโหลดได้หลังเข้าสู่ระบบแล้ว'
+        );
       }
       // RouteGuard will redirect if session exists.
     } catch (err) {
-      setSubmitResult({
-        status: 'error',
-        title: 'สมัครไม่สำเร็จ',
-        message: err?.message ?? 'กรุณาลองใหม่อีกครั้ง',
-      });
+      Alert.alert('สมัครไม่สำเร็จ', err?.message ?? 'กรุณาลองใหม่อีกครั้ง');
     } finally {
       setSubmitting(false);
     }
@@ -286,49 +248,6 @@ export default function SignupScreen() {
       </LinearGradient>
 
       <View style={styles.card}>
-        {submitResult?.status ? (
-          <ResultPanel
-            variant={submitResult.status === 'error' ? 'error' : 'success'}
-            title={submitResult.title}
-            message={submitResult.message}
-            primaryAction={
-              submitResult.status === 'success' ? (
-                <Link href="/(auth)/login" asChild>
-                  <Pressable
-                    accessibilityRole="button"
-                    accessibilityLabel="กลับไปหน้าเข้าสู่ระบบ"
-                    style={styles.resultPrimaryButton}
-                  >
-                    <Text style={styles.resultPrimaryButtonText}>กลับไปหน้าเข้าสู่ระบบ</Text>
-                  </Pressable>
-                </Link>
-              ) : (
-                <Pressable
-                  onPress={() => setSubmitResult(null)}
-                  accessibilityRole="button"
-                  accessibilityLabel="ลองสมัครใหม่"
-                  style={styles.resultPrimaryButton}
-                >
-                  <Text style={styles.resultPrimaryButtonText}>ลองใหม่</Text>
-                </Pressable>
-              )
-            }
-            secondaryAction={
-              submitResult.status === 'error' ? (
-                <Link href="/(auth)/login" asChild>
-                  <Pressable
-                    accessibilityRole="button"
-                    accessibilityLabel="ไปหน้าเข้าสู่ระบบ"
-                    style={styles.resultSecondaryButton}
-                  >
-                    <Text style={styles.resultSecondaryButtonText}>ไปหน้าเข้าสู่ระบบ</Text>
-                  </Pressable>
-                </Link>
-              ) : null
-            }
-          />
-        ) : null}
-
         <Text style={styles.label}>อีเมล</Text>
         <TextInput
           value={email}
@@ -509,7 +428,7 @@ export default function SignupScreen() {
 
         <Pressable
           onPress={onSignup}
-          disabled={submitting || avatarUploading || submitResult?.status === 'success'}
+          disabled={submitting || avatarUploading}
           style={[styles.primaryButton, submitting && { opacity: 0.7 }]}
         >
           <Text style={styles.primaryButtonText}>
@@ -631,75 +550,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '900',
     color: WarmClearTheme.colors.primaryDark,
-  },
-
-  resultPanel: {
-    marginBottom: 14,
-    borderRadius: WarmClearTheme.radii.card,
-    padding: 14,
-    borderWidth: 1,
-    ...WarmClearTheme.shadows.subtle,
-  },
-  resultPanelSuccess: {
-    backgroundColor: WarmClearTheme.colors.primarySoft,
-    borderColor: WarmClearTheme.colors.primarySoftBorder,
-  },
-  resultPanelError: {
-    backgroundColor: WarmClearTheme.colors.dangerSoft,
-    borderColor: WarmClearTheme.colors.dangerSoftBorder,
-  },
-  resultTitle: {
-    fontSize: 16,
-    fontWeight: '900',
-    marginBottom: 6,
-  },
-  resultTitleSuccess: {
-    color: WarmClearTheme.colors.primaryDark,
-  },
-  resultTitleError: {
-    color: WarmClearTheme.colors.danger,
-  },
-  resultMessage: {
-    fontSize: 14,
-    fontWeight: '800',
-    color: WarmClearTheme.colors.textSub,
-    lineHeight: 20,
-  },
-  resultActionsRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
-    marginTop: 12,
-  },
-  resultPrimaryButton: {
-    backgroundColor: WarmClearTheme.colors.primary,
-    borderRadius: WarmClearTheme.radii.control,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    minHeight: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  resultPrimaryButtonText: {
-    fontSize: 14,
-    fontWeight: '900',
-    color: '#ffffff',
-  },
-  resultSecondaryButton: {
-    backgroundColor: WarmClearTheme.colors.surface,
-    borderRadius: WarmClearTheme.radii.control,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    minHeight: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: WarmClearTheme.colors.border,
-  },
-  resultSecondaryButtonText: {
-    fontSize: 14,
-    fontWeight: '900',
-    color: WarmClearTheme.colors.text,
   },
 
   avatarRow: {
