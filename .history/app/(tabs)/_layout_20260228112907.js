@@ -53,12 +53,6 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="friend-profile"
-        options={{
-          href: null,
-        }}
-      />
-      <Tabs.Screen
         name="index"
         options={{
           title: 'กิจกรรม',
