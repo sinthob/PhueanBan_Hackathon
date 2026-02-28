@@ -1,7 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import {
   Alert,
-  Image,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -9,8 +8,6 @@ import {
   TextInput,
   View,
 } from 'react-native';
-
-import { Ionicons } from '@expo/vector-icons';
 
 import { categories } from '../../data/mockData';
 import { getActivityProfile } from '../../data/aiProfileStore';
@@ -53,47 +50,6 @@ const ONSITE_PRESETS = [
   { label: 'ตลาดใกล้บ้าน (mock)', latitude: 13.7383, longitude: 100.5609 },
 ];
 
-function clampLat(lat) {
-  // Web Mercator valid range
-  return Math.max(-85.05112878, Math.min(85.05112878, lat));
-}
-
-function latLngToTileXY(latitude, longitude, zoom) {
-  const lat = clampLat(Number(latitude) || 13.7563);
-  const lng = Number(longitude) || 100.5018;
-  const z = Number.isFinite(zoom) ? zoom : 13;
-  const n = 2 ** z;
-
-  const x = Math.floor(((lng + 180) / 360) * n);
-  const latRad = (lat * Math.PI) / 180;
-  const y = Math.floor(
-    ((1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2) * n
-  );
-
-  return { x, y, z, n };
-}
-
-function wrapX(x, n) {
-  const mod = x % n;
-  return mod < 0 ? mod + n : mod;
-}
-
-function getOsmTileUrl(z, x, y, n) {
-  const safeX = wrapX(x, n);
-  const safeY = Math.max(0, Math.min(n - 1, y));
-  return `https://tile.openstreetmap.org/${z}/${safeX}/${safeY}.png`;
-}
-
-function getOsmTileGrid({ latitude, longitude, zoom = 13 }) {
-  const { x, y, z, n } = latLngToTileXY(latitude, longitude, zoom);
-  return [
-    getOsmTileUrl(z, x, y, n),
-    getOsmTileUrl(z, x + 1, y, n),
-    getOsmTileUrl(z, x, y + 1, n),
-    getOsmTileUrl(z, x + 1, y + 1, n),
-  ];
-}
-
 export default function CreateActivityScreen() {
   const existing = useMemo(() => getActivityProfile(), []);
   const availableCategories = useMemo(
@@ -108,22 +64,12 @@ export default function CreateActivityScreen() {
   const [activityMode, setActivityMode] = useState('online');
   const [onsiteLocation, setOnsiteLocation] = useState(null);
   const [onsitePresetIndex, setOnsitePresetIndex] = useState(0);
-  const [placeQuery, setPlaceQuery] = useState('');
-  const [mapLoadError, setMapLoadError] = useState(false);
 
   const [distancePref, setDistancePref] = useState(existing?.distancePref || DEFAULTS.distancePref);
   const [placePref, setPlacePref] = useState(existing?.placePref || DEFAULTS.placePref);
   const [groupPref, setGroupPref] = useState(existing?.groupPref || DEFAULTS.groupPref);
   const [timePref, setTimePref] = useState(existing?.timePref || DEFAULTS.timePref);
   const [categoryPrefs, setCategoryPrefs] = useState(existing?.categoryPrefs || DEFAULTS.categoryPrefs);
-
-  const mapBaseLocation = useMemo(() => {
-    return onsiteLocation || ONSITE_PRESETS[onsitePresetIndex] || ONSITE_PRESETS[0];
-  }, [onsiteLocation, onsitePresetIndex]);
-
-  const mapTileUris = useMemo(() => {
-    return getOsmTileGrid(mapBaseLocation);
-  }, [mapBaseLocation]);
 
   const toggleCategory = (value) => {
     setCategoryPrefs((prev) => {
@@ -181,6 +127,7 @@ export default function CreateActivityScreen() {
       activityDraft.activityMode === 'onsite' && activityDraft.onsiteLocation
         ? `สถานที่: ${activityDraft.onsiteLocation.label}`
         : null,
+      `ระยะทาง: ${activityDraft.distancePref}`,
       `เวลา: ${activityDraft.timePref}`,
       `หมวด: ${activityDraft.categoryPrefs.map(catLabel).join(', ')}`,
     ].filter(Boolean);
@@ -247,7 +194,6 @@ export default function CreateActivityScreen() {
               onPress={() => {
                 setActivityMode('online');
                 setOnsiteLocation(null);
-                setPlaceQuery('');
               }}
             />
             <SegmentButton
@@ -258,120 +204,77 @@ export default function CreateActivityScreen() {
           </View>
 
           {activityMode === 'onsite' ? (
-            <View style={styles.onsiteWrap}>
-              <View style={styles.mapFrame}>
-                <Pressable
-                  onPress={() => {
-                    const nextIdx = (onsitePresetIndex + 1) % ONSITE_PRESETS.length;
-                    setOnsitePresetIndex(nextIdx);
-                    setOnsiteLocation(ONSITE_PRESETS[nextIdx]);
-                    setMapLoadError(false);
-                  }}
-                  accessibilityRole="button"
-                  accessibilityLabel="แผนที่ (mock) แตะเพื่อเลือกตำแหน่ง"
-                  style={styles.mapTap}
-                >
-                  {mapLoadError ? (
-                    <View style={styles.mapFallback}>
-                      <Ionicons name="map" size={28} color={WarmClearTheme.colors.textSub} />
-                      <Text style={styles.mapFallbackText}>แผนที่ยังโหลดไม่ได้ (mock)</Text>
-                      <Text style={styles.mapFallbackSubText}>แตะเพื่อสลับตำแหน่งตัวอย่าง</Text>
-                    </View>
-                  ) : (
-                    <View style={styles.mapTileGrid}>
-                      <View style={styles.mapTileRow}>
-                        <Image
-                          source={{ uri: mapTileUris[0] }}
-                          resizeMode="cover"
-                          style={styles.mapTile}
-                          onError={() => setMapLoadError(true)}
-                          accessibilityLabel="แผนที่ตัวอย่าง (tile 1)"
-                        />
-                        <Image
-                          source={{ uri: mapTileUris[1] }}
-                          resizeMode="cover"
-                          style={styles.mapTile}
-                          onError={() => setMapLoadError(true)}
-                          accessibilityLabel="แผนที่ตัวอย่าง (tile 2)"
-                        />
-                      </View>
-                      <View style={styles.mapTileRow}>
-                        <Image
-                          source={{ uri: mapTileUris[2] }}
-                          resizeMode="cover"
-                          style={styles.mapTile}
-                          onError={() => setMapLoadError(true)}
-                          accessibilityLabel="แผนที่ตัวอย่าง (tile 3)"
-                        />
-                        <Image
-                          source={{ uri: mapTileUris[3] }}
-                          resizeMode="cover"
-                          style={styles.mapTile}
-                          onError={() => setMapLoadError(true)}
-                          accessibilityLabel="แผนที่ตัวอย่าง (tile 4)"
-                        />
-                      </View>
-                    </View>
-                  )}
-
-                  <View pointerEvents="none" style={styles.mapPinOverlay}>
-                    <Ionicons
-                      name="location-sharp"
-                      size={26}
-                      color={WarmClearTheme.colors.primary}
-                    />
-                  </View>
-                </Pressable>
-
-                <View style={styles.mapSearchOverlay}>
-                  <TextInput
-                    value={placeQuery}
-                    onChangeText={setPlaceQuery}
-                    placeholder="ค้นหาสถานที่"
-                    placeholderTextColor={WarmClearTheme.colors.textMuted}
-                    style={styles.mapSearchInput}
-                    returnKeyType="search"
-                    onSubmitEditing={() => {
-                      const trimmed = placeQuery.trim();
-                      if (!trimmed) return;
-                      const base = onsiteLocation || ONSITE_PRESETS[onsitePresetIndex] || ONSITE_PRESETS[0];
-                      setOnsiteLocation({
-                        label: `${trimmed} (mock)`,
-                        latitude: base.latitude,
-                        longitude: base.longitude,
-                      });
-                    }}
-                  />
-                  <Pressable
-                    onPress={() => {
-                      const trimmed = placeQuery.trim();
-                      if (!trimmed) {
-                        Alert.alert('ค้นหาสถานที่', 'กรุณาพิมพ์ชื่อสถานที่');
-                        return;
-                      }
-
-                      const base = onsiteLocation || ONSITE_PRESETS[onsitePresetIndex] || ONSITE_PRESETS[0];
-                      setOnsiteLocation({
-                        label: `${trimmed} (mock)`,
-                        latitude: base.latitude,
-                        longitude: base.longitude,
-                      });
-                      setMapLoadError(false);
-                    }}
-                    accessibilityRole="button"
-                    accessibilityLabel="ค้นหาสถานที่"
-                    style={styles.mapSearchButton}
-                  >
-                    <Ionicons name="search" size={22} color={WarmClearTheme.colors.text} />
-                  </Pressable>
-                </View>
-              </View>
-
-              <Text style={styles.mapSelectedText}>
-                {onsiteLocation ? `📍 ${onsiteLocation.label}` : 'ยังไม่ได้เลือกตำแหน่ง'}
+            <View style={styles.mapCard}>
+              <Text style={styles.mapTitle}>เลือกสถานที่บนแผนที่ (mock)</Text>
+              <Text style={styles.mapBody}>
+                {onsiteLocation
+                  ? `📍 ${onsiteLocation.label}\n(${onsiteLocation.latitude.toFixed(4)}, ${onsiteLocation.longitude.toFixed(4)})`
+                  : 'ยังไม่ได้เลือกตำแหน่ง'}
               </Text>
+
+              <Pressable
+                onPress={() => {
+                  const nextIdx = (onsitePresetIndex + 1) % ONSITE_PRESETS.length;
+                  setOnsitePresetIndex(nextIdx);
+                  setOnsiteLocation(ONSITE_PRESETS[nextIdx]);
+                }}
+                accessibilityRole="button"
+                accessibilityLabel="เลือกตำแหน่งบนแผนที่"
+                style={styles.mapPickButton}
+              >
+                <Text style={styles.mapPickButtonText}>แตะเพื่อเลือกตำแหน่ง (mock)</Text>
+              </Pressable>
             </View>
           ) : null}
+        </Section>
+
+        <View style={styles.sectionSpacer} />
+
+        <Section title="ระยะทาง" description="เลือกคร่าวๆ ว่าอยากชวนคนไกลแค่ไหน">
+          <View style={styles.segmentGrid}>
+            <SegmentButton
+              label="ใกล้มาก"
+              active={distancePref === 'near'}
+              onPress={() => setDistancePref('near')}
+            />
+            <SegmentButton
+              label="ใกล้"
+              active={distancePref === 'medium'}
+              onPress={() => setDistancePref('medium')}
+            />
+            <SegmentButton
+              label="ไม่จำกัด"
+              active={distancePref === 'any'}
+              onPress={() => setDistancePref('any')}
+            />
+          </View>
+        </Section>
+
+        <View style={styles.sectionSpacer} />
+
+        <Section title="ช่วงเวลา" description="เลือกช่วงเวลาที่เหมาะกับกิจกรรมนี้">
+          <View style={styles.segmentGrid}>
+            <SegmentButton
+              label="เช้า"
+              active={timePref === 'morning'}
+              onPress={() => setTimePref('morning')}
+            />
+            <SegmentButton
+              label="บ่าย"
+              active={timePref === 'afternoon'}
+              onPress={() => setTimePref('afternoon')}
+            />
+            <SegmentButton
+              label="เย็น"
+              active={timePref === 'evening'}
+              onPress={() => setTimePref('evening')}
+            />
+            <SegmentButton
+              label="ได้หมด"
+              active={timePref === 'any'}
+              onPress={() => setTimePref('any')}
+            />
+          </View>
         </Section>
       </View>
 
@@ -570,92 +473,41 @@ const styles = StyleSheet.create({
     marginTop: 14,
     gap: 12,
   },
-  onsiteWrap: {
+  mapCard: {
     marginTop: 14,
-    gap: 12,
-  },
-  mapFrame: {
-    borderRadius: WarmClearTheme.radii.card,
     backgroundColor: WarmClearTheme.colors.surfaceSoft,
-    borderWidth: 1,
-    borderColor: WarmClearTheme.colors.border,
-    overflow: 'hidden',
-    ...WarmClearTheme.shadows.subtle,
-  },
-  mapTap: {
-    minHeight: 220,
-  },
-  mapTileGrid: {
-    width: '100%',
-    height: 220,
-  },
-  mapTileRow: {
-    flex: 1,
-    flexDirection: 'row',
-  },
-  mapTile: {
-    flex: 1,
-  },
-  mapPinOverlay: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  mapFallback: {
-    width: '100%',
-    height: 220,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-  },
-  mapFallbackText: {
-    fontSize: 16,
-    fontWeight: '900',
-    color: WarmClearTheme.colors.textSub,
-  },
-  mapFallbackSubText: {
-    fontSize: 14,
-    fontWeight: '800',
-    color: WarmClearTheme.colors.textMuted,
-  },
-  mapSearchOverlay: {
-    position: 'absolute',
-    top: 12,
-    left: 12,
-    right: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: WarmClearTheme.colors.surface,
-    borderRadius: WarmClearTheme.radii.control,
+    borderRadius: WarmClearTheme.radii.card,
+    padding: 14,
     borderWidth: 1,
     borderColor: WarmClearTheme.colors.border,
     ...WarmClearTheme.shadows.subtle,
   },
-  mapSearchInput: {
-    flex: 1,
-    minHeight: 52,
-    paddingHorizontal: 14,
+  mapTitle: {
     fontSize: 18,
-    fontWeight: '800',
+    fontWeight: '900',
     color: WarmClearTheme.colors.text,
+    marginBottom: 8,
   },
-  mapSearchButton: {
-    minHeight: 52,
-    width: 56,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderLeftWidth: 1,
-    borderLeftColor: WarmClearTheme.colors.border,
-  },
-  mapSelectedText: {
+  mapBody: {
     fontSize: 16,
     fontWeight: '800',
     color: WarmClearTheme.colors.textSub,
     lineHeight: 22,
+    marginBottom: 12,
+  },
+  mapPickButton: {
+    minHeight: 56,
+    borderRadius: WarmClearTheme.radii.control,
+    backgroundColor: WarmClearTheme.colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...WarmClearTheme.shadows.button,
+  },
+  mapPickButtonText: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: WarmClearTheme.colors.surface,
+    textAlign: 'center',
   },
   hintBox: {
     backgroundColor: WarmClearTheme.colors.warningSoft,

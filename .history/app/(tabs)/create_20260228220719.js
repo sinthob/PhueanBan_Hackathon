@@ -373,6 +373,33 @@ export default function CreateActivityScreen() {
             </View>
           ) : null}
         </Section>
+
+        <View style={styles.sectionSpacer} />
+
+        <Section title="ช่วงเวลา" description="เลือกช่วงเวลาที่เหมาะกับกิจกรรมนี้">
+          <View style={styles.segmentGrid}>
+            <SegmentButton
+              label="เช้า"
+              active={timePref === 'morning'}
+              onPress={() => setTimePref('morning')}
+            />
+            <SegmentButton
+              label="บ่าย"
+              active={timePref === 'afternoon'}
+              onPress={() => setTimePref('afternoon')}
+            />
+            <SegmentButton
+              label="เย็น"
+              active={timePref === 'evening'}
+              onPress={() => setTimePref('evening')}
+            />
+            <SegmentButton
+              label="ได้หมด"
+              active={timePref === 'any'}
+              onPress={() => setTimePref('any')}
+            />
+          </View>
+        </Section>
       </View>
 
       <View style={styles.cardSpacing} />

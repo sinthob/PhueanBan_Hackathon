@@ -29,16 +29,6 @@ function SegmentButton({ label, active, onPress }) {
   );
 }
 
-function Section({ title, description, children }) {
-  return (
-    <View style={styles.section}>
-      <Text style={styles.sectionTitle}>{title}</Text>
-      {description ? <Text style={styles.sectionDescription}>{description}</Text> : null}
-      {children}
-    </View>
-  );
-}
-
 const DEFAULTS = {
   distancePref: 'near',
   placePref: 'any',
@@ -189,45 +179,47 @@ export default function CreateActivityScreen() {
   };
 
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.content}
-      keyboardShouldPersistTaps="handled"
-    >
-      <View style={styles.header}>
-        <Text style={styles.title}>สร้างกิจกรรม</Text>
-        <Text style={styles.subtitle}>กรอกข้อมูลสั้นๆ เพื่อสร้างกิจกรรมได้ทันที</Text>
-      </View>
+    <View style={styles.container}>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={styles.header}>
+          <Text style={styles.title}>สร้างกิจกรรม</Text>
+          <Text style={styles.subtitle}>กรอกข้อมูลสั้นๆ</Text>
+        </View>
 
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>ข้อมูลพื้นฐาน</Text>
+        <View style={styles.sectionBlock}>
+          <Text style={styles.sectionHeading}>ข้อมูลพื้นฐาน</Text>
 
-        <Text style={styles.label}>ชื่อกิจกรรม</Text>
-        <TextInput
-          value={title}
-          onChangeText={setTitle}
-          placeholder="เช่น เดินเล่นตอนเช้า"
-          placeholderTextColor={WarmClearTheme.colors.textMuted}
-          style={styles.input}
-        />
+          <Text style={styles.fieldLabel}>ชื่อกิจกรรม</Text>
+          <TextInput
+            value={title}
+            onChangeText={setTitle}
+            placeholder="เช่น เดินเล่นตอนเช้า"
+            placeholderTextColor={WarmClearTheme.colors.textMuted}
+            style={styles.input}
+          />
 
-        <Text style={[styles.label, { marginTop: 14 }]}>รายละเอียด (ไม่บังคับ)</Text>
-        <TextInput
-          value={details}
-          onChangeText={setDetails}
-          placeholder="เช่น นัดเจอหน้าสวน 6 โมง เดินช้าๆ คุยสบายๆ"
-          placeholderTextColor={WarmClearTheme.colors.textMuted}
-          style={[styles.input, styles.textArea]}
-          multiline
-        />
-      </View>
+          <View style={styles.fieldSpacer} />
 
-      <View style={styles.cardSpacing} />
+          <Text style={styles.fieldLabel}>รายละเอียด (ไม่บังคับ)</Text>
+          <TextInput
+            value={details}
+            onChangeText={setDetails}
+            placeholder="เช่น นัดเจอหน้าสวน 6 โมง เดินช้าๆ คุยสบายๆ"
+            placeholderTextColor={WarmClearTheme.colors.textMuted}
+            style={[styles.input, styles.textArea]}
+            multiline
+          />
+        </View>
 
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>ตั้งค่ากิจกรรม</Text>
+        <View style={styles.sectionGap} />
 
-        <Section title="เวลาเริ่มกิจกรรม" description="พิมพ์เวลาที่ต้องการเริ่ม (mock)">
+        <View style={styles.sectionBlock}>
+          <Text style={styles.sectionHeading}>เวลา</Text>
+          <Text style={styles.fieldLabel}>เวลาเริ่มกิจกรรม</Text>
           <TextInput
             value={startAt}
             onChangeText={setStartAt}
@@ -235,11 +227,38 @@ export default function CreateActivityScreen() {
             placeholderTextColor={WarmClearTheme.colors.textMuted}
             style={styles.input}
           />
-        </Section>
 
-        <View style={styles.sectionSpacer} />
+          <View style={styles.fieldSpacer} />
 
-        <Section title="รูปแบบกิจกรรม" description="เลือกว่าจะทำออนไลน์หรือเจอกันจริง">
+          <Text style={styles.fieldLabel}>ช่วงเวลา</Text>
+          <View style={styles.segmentGrid}>
+            <SegmentButton
+              label="เช้า"
+              active={timePref === 'morning'}
+              onPress={() => setTimePref('morning')}
+            />
+            <SegmentButton
+              label="บ่าย"
+              active={timePref === 'afternoon'}
+              onPress={() => setTimePref('afternoon')}
+            />
+            <SegmentButton
+              label="เย็น"
+              active={timePref === 'evening'}
+              onPress={() => setTimePref('evening')}
+            />
+            <SegmentButton
+              label="ได้หมด"
+              active={timePref === 'any'}
+              onPress={() => setTimePref('any')}
+            />
+          </View>
+        </View>
+
+        <View style={styles.sectionGap} />
+
+        <View style={styles.sectionBlock}>
+          <Text style={styles.sectionHeading}>รูปแบบกิจกรรม</Text>
           <View style={styles.segmentGrid}>
             <SegmentButton
               label={activityMode === 'online' ? '✓ ออนไลน์' : 'ออนไลน์'}
@@ -372,31 +391,29 @@ export default function CreateActivityScreen() {
               </Text>
             </View>
           ) : null}
-        </Section>
-      </View>
-
-      <View style={styles.cardSpacing} />
-
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>หมวดกิจกรรม</Text>
-        <Text style={styles.helperText}>เลือกได้หลายข้อ (อย่างน้อย 1 หมวด)</Text>
-
-        <View style={styles.segmentGrid}>
-          {availableCategories.map((c) => {
-            const active = categoryPrefs.includes(c.value);
-            return (
-              <SegmentButton
-                key={c.id}
-                label={c.label}
-                active={active}
-                onPress={() => toggleCategory(c.value)}
-              />
-            );
-          })}
         </View>
-      </View>
 
-      <View style={styles.actions}>
+        <View style={styles.sectionGap} />
+
+        <View style={styles.sectionBlock}>
+          <Text style={styles.sectionHeading}>หมวดกิจกรรม</Text>
+          <View style={styles.segmentGrid}>
+            {availableCategories.map((c) => {
+              const active = categoryPrefs.includes(c.value);
+              return (
+                <SegmentButton
+                  key={c.id}
+                  label={c.label}
+                  active={active}
+                  onPress={() => toggleCategory(c.value)}
+                />
+              );
+            })}
+          </View>
+        </View>
+      </ScrollView>
+
+      <View style={styles.footer}>
         <Pressable
           onPress={onSave}
           accessibilityRole="button"
@@ -405,15 +422,9 @@ export default function CreateActivityScreen() {
         >
           <Text style={styles.primaryButtonText}>สร้างกิจกรรม</Text>
         </Pressable>
-
-        <View style={styles.hintBox}>
-          <Text style={styles.hintTitle}>หมายเหตุ (mock)</Text>
-          <Text style={styles.hintBody}>
-            ตอนนี้ยังไม่บันทึกลงฐานข้อมูลจริง ระบบจะแสดงสรุปค่าที่เลือกเป็นตัวอย่าง
-          </Text>
-        </View>
+        <Text style={styles.footerHint}>หมายเหตุ (mock): ระบบจะแสดงสรุปค่าที่เลือกเป็นตัวอย่าง</Text>
       </View>
-    </ScrollView>
+    </View>
   );
 }
 
@@ -422,93 +433,69 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: WarmClearTheme.colors.background,
   },
+  scroll: {
+    flex: 1,
+  },
   content: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 18,
     paddingTop: 18,
-    paddingBottom: 120,
+    paddingBottom: 170,
   },
   header: {
-    marginBottom: 14,
+    marginBottom: 18,
   },
   title: {
     fontSize: 24,
-    fontWeight: '900',
+    fontWeight: '800',
     color: WarmClearTheme.colors.text,
-    marginBottom: 8,
+    marginBottom: 6,
   },
   subtitle: {
     fontSize: 18,
     color: WarmClearTheme.colors.textSub,
-    fontWeight: '800',
+    fontWeight: '600',
     lineHeight: 26,
   },
-  card: {
-    backgroundColor: WarmClearTheme.colors.surface,
-    borderRadius: WarmClearTheme.radii.card,
-    padding: 18,
-    ...WarmClearTheme.shadows.subtle,
+  sectionBlock: {
+    paddingVertical: 2,
   },
-  cardSpacing: {
-    height: 14,
-  },
-  cardTitle: {
-    fontSize: 20,
-    fontWeight: '900',
+  sectionHeading: {
+    fontSize: 22,
+    fontWeight: '800',
     color: WarmClearTheme.colors.text,
-    marginBottom: 12,
+    marginBottom: 14,
   },
-  label: {
-    fontSize: 18,
-    fontWeight: '900',
-    color: WarmClearTheme.colors.text,
-    marginBottom: 8,
+  fieldLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: WarmClearTheme.colors.textSub,
+    marginBottom: 10,
+  },
+  fieldSpacer: {
+    height: 18,
+  },
+  sectionGap: {
+    height: 28,
   },
   input: {
-    borderWidth: 1,
-    borderColor: WarmClearTheme.colors.border,
+    borderWidth: 0,
     borderRadius: WarmClearTheme.radii.control,
     backgroundColor: WarmClearTheme.colors.surfaceSoft,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
     minHeight: 52,
     fontSize: 18,
-    fontWeight: '800',
+    fontWeight: '600',
     color: WarmClearTheme.colors.text,
   },
   textArea: {
     minHeight: 110,
     textAlignVertical: 'top',
   },
-  section: {
-    backgroundColor: WarmClearTheme.colors.surface,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '900',
-    color: WarmClearTheme.colors.text,
-    marginBottom: 8,
-  },
-  sectionDescription: {
-    fontSize: 16,
-    fontWeight: '800',
-    color: WarmClearTheme.colors.textSub,
-    lineHeight: 22,
-    marginBottom: 12,
-  },
-  sectionSpacer: {
-    height: 18,
-  },
-  helperText: {
-    fontSize: 16,
-    fontWeight: '800',
-    color: WarmClearTheme.colors.textSub,
-    lineHeight: 22,
-    marginBottom: 14,
-  },
   segmentGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
+    gap: 14,
   },
   segment: {
     flexGrow: 1,
@@ -516,59 +503,22 @@ const styles = StyleSheet.create({
     minHeight: 56,
     paddingHorizontal: 12,
     borderRadius: WarmClearTheme.radii.control,
-    borderWidth: 1,
-    borderColor: WarmClearTheme.colors.border,
+    borderWidth: 0,
     backgroundColor: WarmClearTheme.colors.surfaceSoft,
     alignItems: 'center',
     justifyContent: 'center',
-    ...WarmClearTheme.shadows.subtle,
   },
   segmentActive: {
     backgroundColor: WarmClearTheme.colors.primary,
-    borderColor: WarmClearTheme.colors.primary,
   },
   segmentText: {
     fontSize: 18,
-    fontWeight: '900',
+    fontWeight: '700',
     color: WarmClearTheme.colors.text,
     textAlign: 'center',
   },
   segmentTextActive: {
     color: WarmClearTheme.colors.surface,
-  },
-  primaryButton: {
-    flex: 1,
-    minHeight: 56,
-    borderRadius: WarmClearTheme.radii.control,
-    backgroundColor: WarmClearTheme.colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    ...WarmClearTheme.shadows.button,
-  },
-  primaryButtonText: {
-    fontSize: 18,
-    fontWeight: '900',
-    color: WarmClearTheme.colors.surface,
-  },
-  secondaryButton: {
-    flex: 1,
-    minHeight: 56,
-    borderRadius: WarmClearTheme.radii.control,
-    backgroundColor: WarmClearTheme.colors.surface,
-    borderWidth: 1,
-    borderColor: WarmClearTheme.colors.border,
-    alignItems: 'center',
-    justifyContent: 'center',
-    ...WarmClearTheme.shadows.subtle,
-  },
-  secondaryButtonText: {
-    fontSize: 18,
-    fontWeight: '900',
-    color: WarmClearTheme.colors.text,
-  },
-  actions: {
-    marginTop: 14,
-    gap: 12,
   },
   onsiteWrap: {
     marginTop: 14,
@@ -577,10 +527,8 @@ const styles = StyleSheet.create({
   mapFrame: {
     borderRadius: WarmClearTheme.radii.card,
     backgroundColor: WarmClearTheme.colors.surfaceSoft,
-    borderWidth: 1,
-    borderColor: WarmClearTheme.colors.border,
+    borderWidth: 0,
     overflow: 'hidden',
-    ...WarmClearTheme.shadows.subtle,
   },
   mapTap: {
     minHeight: 220,
@@ -631,16 +579,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: WarmClearTheme.colors.surface,
     borderRadius: WarmClearTheme.radii.control,
-    borderWidth: 1,
-    borderColor: WarmClearTheme.colors.border,
-    ...WarmClearTheme.shadows.subtle,
+    borderWidth: 0,
   },
   mapSearchInput: {
     flex: 1,
     minHeight: 52,
     paddingHorizontal: 14,
     fontSize: 18,
-    fontWeight: '800',
+    fontWeight: '600',
     color: WarmClearTheme.colors.text,
   },
   mapSearchButton: {
@@ -648,33 +594,38 @@ const styles = StyleSheet.create({
     width: 56,
     alignItems: 'center',
     justifyContent: 'center',
-    borderLeftWidth: 1,
-    borderLeftColor: WarmClearTheme.colors.border,
+    borderLeftWidth: 0,
   },
   mapSelectedText: {
     fontSize: 16,
-    fontWeight: '800',
+    fontWeight: '600',
     color: WarmClearTheme.colors.textSub,
     lineHeight: 22,
   },
-  hintBox: {
-    backgroundColor: WarmClearTheme.colors.warningSoft,
-    borderRadius: WarmClearTheme.radii.card,
-    padding: 14,
-    borderWidth: 1,
-    borderColor: WarmClearTheme.colors.warningSoftBorder,
-    ...WarmClearTheme.shadows.subtle,
+  footer: {
+    position: 'absolute',
+    left: 18,
+    right: 18,
+    bottom: 18,
+    gap: 8,
   },
-  hintTitle: {
-    fontSize: 16,
-    fontWeight: '900',
-    color: WarmClearTheme.colors.warningText,
-    marginBottom: 6,
+  primaryButton: {
+    minHeight: 56,
+    borderRadius: WarmClearTheme.radii.control,
+    backgroundColor: WarmClearTheme.colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  hintBody: {
-    fontSize: 16,
+  primaryButtonText: {
+    fontSize: 18,
     fontWeight: '800',
-    color: WarmClearTheme.colors.warningText,
-    lineHeight: 22,
+    color: WarmClearTheme.colors.surface,
+  },
+  footerHint: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: WarmClearTheme.colors.textMuted,
+    lineHeight: 20,
+    textAlign: 'center',
   },
 });

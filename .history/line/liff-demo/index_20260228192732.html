@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>LIFF Demo</title>
+    <style>
+      body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 24px; }
+      .card { max-width: 720px; border: 1px solid #ddd; border-radius: 10px; padding: 16px; }
+      .row { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
+      button { padding: 10px 12px; border-radius: 8px; border: 1px solid #ccc; background: #fff; cursor: pointer; }
+      button:disabled { opacity: 0.5; cursor: not-allowed; }
+      pre { background: #f6f8fa; padding: 12px; border-radius: 8px; overflow: auto; }
+      .muted { color: #666; font-size: 14px; }
+      .ok { color: #0a7a2f; }
+      .err { color: #b00020; }
+      code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>LIFF Demo</h1>
+      <p class="muted">
+        หน้านี้ไว้เดโมว่า Rich Menu เปิดเว็บผ่าน LINE ได้ และ (ถ้าตั้งค่า LIFF ถูก) จะอ่านสถานะ login / profile ได้
+      </p>
+
+      <div class="row">
+        <button id="btnInit">1) Init LIFF</button>
+        <button id="btnLogin" disabled>2) Login</button>
+        <button id="btnLogout" disabled>Logout</button>
+        <button id="btnProfile" disabled>Get profile</button>
+      </div>
+
+      <div id="status" class="muted">สถานะ: ยังไม่ได้ init</div>
+      <pre id="out">(output)</pre>
+
+      <p class="muted">
+        ตั้งค่า <code>LIFF_ID</code> ในไฟล์นี้ หรือเปิดด้วย querystring <code>?liffId=xxx</code> (ช่วยทดสอบตอนเปิดตรงๆ)
+      </p>
+    </div>
+
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <script>
+      const LIFF_ID_FALLBACK = "YOUR_LIFF_ID";
+      const qs = new URLSearchParams(window.location.search);
+      const LIFF_ID = qs.get("liffId") || LIFF_ID_FALLBACK;
+
+      const elStatus = document.getElementById("status");
+      const elOut = document.getElementById("out");
+      const btnInit = document.getElementById("btnInit");
+      const btnLogin = document.getElementById("btnLogin");
+      const btnLogout = document.getElementById("btnLogout");
+      const btnProfile = document.getElementById("btnProfile");
+
+      function setStatus(text, kind) {
+        elStatus.textContent = `สถานะ: ${text}`;
+        elStatus.className = kind === "ok" ? "ok" : kind === "err" ? "err" : "muted";
+      }
+
+      function setOut(obj) {
+        elOut.textContent = typeof obj === "string" ? obj : JSON.stringify(obj, null, 2);
+      }
+
+      function setButtons({ inited, loggedIn }) {
+        btnLogin.disabled = !inited || loggedIn;
+        btnLogout.disabled = !inited || !loggedIn;
+        btnProfile.disabled = !inited || !loggedIn;
+      }
+
+      async function initLiff() {
+        if (!window.liff) {
+          setStatus("ไม่พบ LIFF SDK", "err");
+          return;
+        }
+        if (!LIFF_ID || LIFF_ID === "YOUR_LIFF_ID") {
+          setStatus("ยังไม่ได้ตั้งค่า LIFF_ID", "err");
+          setOut({
+            help: "ตั้งค่า LIFF_ID ใน line/liff-demo/index.html หรือส่ง ?liffId=xxx",
+            exampleOpen: "https://liff.line.me/{LIFF_ID}",
+          });
+          return;
+        }
+
+        try {
+          setStatus("กำลัง init...", "");
+          await liff.init({ liffId: LIFF_ID });
+
+          const loggedIn = liff.isLoggedIn();
+          setButtons({ inited: true, loggedIn });
+
+          setStatus(loggedIn ? "init สำเร็จ + login แล้ว" : "init สำเร็จ (ยังไม่ login)", "ok");
+          setOut({
+            liffId: LIFF_ID,
+            os: liff.getOS(),
+            language: liff.getLanguage(),
+            version: liff.getVersion(),
+            isInClient: liff.isInClient(),
+            isLoggedIn: loggedIn,
+            url: window.location.href,
+          });
+        } catch (e) {
+          setStatus("init ไม่สำเร็จ", "err");
+          setOut({ error: String(e?.message || e), hint: "เช็คว่า LIFF Endpoint URL ตรงกับ URL ที่เปิดอยู่ และเป็น https" });
+          setButtons({ inited: false, loggedIn: false });
+        }
+      }
+
+      async function getProfile() {
+        try {
+          const profile = await liff.getProfile();
+          setOut({ profile });
+          setStatus("ดึง profile แล้ว", "ok");
+        } catch (e) {
+          setStatus("ดึง profile ไม่สำเร็จ", "err");
+          setOut({ error: String(e?.message || e) });
+        }
+      }
+
+      btnInit.addEventListener("click", initLiff);
+      btnLogin.addEventListener("click", () => liff.login({ redirectUri: window.location.href }));
+      btnLogout.addEventListener("click", () => { liff.logout(); window.location.reload(); });
+      btnProfile.addEventListener("click", getProfile);
+
+      // Safe defaults
+      setButtons({ inited: false, loggedIn: false });
+    </script>
+  </body>
+</html>
