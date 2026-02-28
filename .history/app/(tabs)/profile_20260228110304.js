@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 
-import { categories, currentUser } from '../../data/mockData';
+import { activities, categories, currentUser } from '../../data/mockData';
 import { useAuth } from '../../providers/providers';
 import {
   getActivityProfile,
@@ -68,6 +68,8 @@ export default function ProfileScreen() {
     }, [])
   );
 
+  const nextActivity = useMemo(() => activities[0] ?? null, []);
+
   const statusMeta = useMemo(() => {
     if (statusKey === 'resting') {
       return {
@@ -101,23 +103,19 @@ export default function ProfileScreen() {
     [activityProfile]
   );
 
+  const onEmergencyContact = () => {
+    Alert.alert(
+      'Emergency Contact (mock)',
+      'โทรหาเบอร์ฉุกเฉิน/ครอบครัวที่ตั้งค่าไว้\n\nตัวอย่าง: 191 หรือ 1669'
+    );
+  };
+
   const cycleStatus = () => {
     setStatusKey((prev) => {
       if (prev === 'ready') return 'resting';
       if (prev === 'resting') return 'need_help';
       return 'ready';
     });
-  };
-
-  const onUrgentContactFamily = () => {
-    Alert.alert('ติดต่อลูกหลานด่วน (mock)', 'กำลังโทร/ส่งข้อความหาลูกหลาน...');
-  };
-
-  const onUrgentContactUs = () => {
-    Alert.alert(
-      'ติดต่อเราเร่งด่วน (mock)',
-      'กำลังติดต่อศูนย์ช่วยเหลือ...\n\nตัวอย่างเบอร์: 1669 / 191'
-    );
   };
 
   const goToPreferences = () => {
@@ -134,7 +132,24 @@ export default function ProfileScreen() {
 
           <Text style={styles.headerBarTitle}>โปรไฟล์</Text>
 
-          <View style={styles.chromeIconSpacer} />
+          <Pressable
+            onPress={() => {
+              confirmAction(
+                'ออกจากระบบ',
+                'คุณต้องการออกจากระบบใช่หรือไม่?',
+                async () => {
+                  try {
+                    await signOut();
+                  } catch (err) {
+                    Alert.alert('ออกจากระบบไม่สำเร็จ', err?.message ?? 'กรุณาลองใหม่');
+                  }
+                }
+              );
+            }}
+            style={styles.chromeIcon}
+          >
+            <Text style={styles.chromeIconText}>⎋</Text>
+          </Pressable>
         </View>
 
         <View style={styles.hero}>
@@ -149,10 +164,7 @@ export default function ProfileScreen() {
           </Text>
 
           <View style={styles.heroActions}>
-            <Pressable
-              onPress={cycleStatus}
-              accessibilityRole="button"
-              accessibilityLabel="เปลี่ยนสถานะ"
+            <View
               style={[
                 styles.statusPill,
                 {
@@ -165,6 +177,16 @@ export default function ProfileScreen() {
               <Text style={[styles.statusText, { color: statusMeta.textColor }]}>
                 {statusMeta.label}
               </Text>
+            </View>
+
+            <Pressable
+              onPress={onEmergencyContact}
+              accessibilityRole="button"
+              accessibilityLabel="ติดต่อฉุกเฉิน"
+              style={styles.emergencyButton}
+            >
+              <Ionicons name="call" size={20} color={WarmClearTheme.colors.accentText} />
+              <Text style={styles.emergencyButtonText}>ติดต่อฉุกเฉิน</Text>
             </Pressable>
           </View>
         </View>
@@ -196,26 +218,59 @@ export default function ProfileScreen() {
       </View>
 
       <View style={styles.card}>
-        <Text style={styles.cardTitle}>ติดต่อด่วน</Text>
+        <Text style={styles.cardTitle}>กิจกรรมถัดไป</Text>
+        {nextActivity ? (
+          <>
+            <Text style={styles.nextActivityTitle}>{nextActivity.icon} {nextActivity.title}</Text>
+            <Text style={styles.nextActivityMeta}>เวลา: {nextActivity.time}</Text>
+            <Text style={styles.nextActivityMeta}>สถานที่: {nextActivity.location}</Text>
+            <Text style={styles.nextActivityMeta}>ระยะทาง: {nextActivity.distance}</Text>
+
+            <Pressable
+              onPress={() => Alert.alert('ดูรายละเอียด (mock)', nextActivity.description)}
+              accessibilityRole="button"
+              accessibilityLabel="ดูรายละเอียดกิจกรรมถัดไป"
+              style={styles.primaryButtonLarge}
+            >
+              <Text style={styles.primaryButtonLargeText}>ดูรายละเอียด</Text>
+            </Pressable>
+          </>
+        ) : (
+          <Text style={styles.cardBody}>ยังไม่มีกิจกรรมถัดไป</Text>
+        )}
+      </View>
+
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>เมนูด่วน</Text>
 
         <Pressable
-          onPress={onUrgentContactFamily}
+          onPress={() => router.push('/(tabs)/discover')}
           accessibilityRole="button"
-          accessibilityLabel="ติดต่อลูกหลานด่วน"
-          style={styles.urgentButtonPrimary}
+          accessibilityLabel="ค้นหากิจกรรมใกล้เคียง"
+          style={styles.quickAction}
         >
-          <Ionicons name="people" size={22} color={WarmClearTheme.colors.surface} />
-          <Text style={styles.urgentButtonText}>ติดต่อลูกหลานด่วน</Text>
+          <Ionicons name="location" size={22} color={WarmClearTheme.colors.primaryDark} />
+          <Text style={styles.quickActionText}>ค้นหากิจกรรมใกล้เคียง</Text>
         </Pressable>
 
         <Pressable
-          onPress={onUrgentContactUs}
+          onPress={cycleStatus}
           accessibilityRole="button"
-          accessibilityLabel="ติดต่อเราเร่งด่วน"
-          style={styles.urgentButtonDanger}
+          accessibilityLabel="อัปเดตสถานะ"
+          style={styles.quickAction}
         >
-          <Ionicons name="call" size={22} color={WarmClearTheme.colors.surface} />
-          <Text style={styles.urgentButtonText}>ติดต่อเราเร่งด่วน</Text>
+          <Ionicons name="heart" size={22} color={WarmClearTheme.colors.primaryDark} />
+          <Text style={styles.quickActionText}>อัปเดตสถานะ</Text>
+        </Pressable>
+
+        <Pressable
+          onPress={() => Alert.alert('ติดต่อครอบครัว (mock)', 'กำลังโทร/ส่งข้อความหาครอบครัว...')}
+          accessibilityRole="button"
+          accessibilityLabel="ติดต่อครอบครัว"
+          style={styles.quickAction}
+        >
+          <Ionicons name="people" size={22} color={WarmClearTheme.colors.primaryDark} />
+          <Text style={styles.quickActionText}>ติดต่อครอบครัว</Text>
         </Pressable>
       </View>
 
@@ -300,10 +355,6 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     color: WarmClearTheme.colors.text,
   },
-  chromeIconSpacer: {
-    width: 42,
-    height: 42,
-  },
   hero: {
     marginTop: 14,
     alignItems: 'center',
@@ -367,6 +418,22 @@ const styles = StyleSheet.create({
   statusText: {
     fontSize: 16,
     fontWeight: '900',
+  },
+  emergencyButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    minHeight: 56,
+    paddingHorizontal: 16,
+    borderRadius: WarmClearTheme.radii.control,
+    backgroundColor: WarmClearTheme.colors.danger,
+    ...WarmClearTheme.shadows.button,
+  },
+  emergencyButtonText: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: WarmClearTheme.colors.surface,
   },
   metricsRow: {
     marginTop: -36,
@@ -464,32 +531,65 @@ const styles = StyleSheet.create({
     lineHeight: 26,
     fontWeight: '800',
   },
-  urgentButtonPrimary: {
+  nextActivityTitle: {
     marginTop: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 12,
-    minHeight: 56,
-    borderRadius: WarmClearTheme.radii.control,
+    fontSize: 20,
+    fontWeight: '900',
+    color: WarmClearTheme.colors.text,
+  },
+  nextActivityMeta: {
+    marginTop: 8,
+    fontSize: 16,
+    fontWeight: '800',
+    color: WarmClearTheme.colors.textSub,
+  },
+  primaryButtonLarge: {
+    marginTop: 14,
     backgroundColor: WarmClearTheme.colors.primary,
-    ...WarmClearTheme.shadows.button,
-  },
-  urgentButtonDanger: {
-    marginTop: 12,
-    flexDirection: 'row',
+    borderRadius: WarmClearTheme.radii.control,
+    minHeight: 56,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 12,
-    minHeight: 56,
-    borderRadius: WarmClearTheme.radii.control,
-    backgroundColor: WarmClearTheme.colors.danger,
     ...WarmClearTheme.shadows.button,
   },
-  urgentButtonText: {
+  primaryButtonLargeText: {
     fontSize: 18,
     fontWeight: '900',
     color: WarmClearTheme.colors.surface,
+  },
+  linkButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    minHeight: 48,
+    justifyContent: 'center',
+    borderRadius: WarmClearTheme.radii.control,
+    backgroundColor: WarmClearTheme.colors.primarySoft,
+    borderWidth: 1,
+    borderColor: WarmClearTheme.colors.primarySoftBorder,
+    ...WarmClearTheme.shadows.subtle,
+  },
+  linkButtonText: {
+    fontSize: 16,
+    fontWeight: '900',
+    color: WarmClearTheme.colors.primaryDark,
+  },
+  quickAction: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    minHeight: 56,
+    paddingHorizontal: 14,
+    borderRadius: WarmClearTheme.radii.control,
+    backgroundColor: WarmClearTheme.colors.surfaceSoft,
+    borderWidth: 1,
+    borderColor: WarmClearTheme.colors.border,
+    marginTop: 12,
+    ...WarmClearTheme.shadows.subtle,
+  },
+  quickActionText: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: WarmClearTheme.colors.text,
   },
   linkButtonLarge: {
     paddingHorizontal: 14,

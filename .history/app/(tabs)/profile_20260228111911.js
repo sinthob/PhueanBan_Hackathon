@@ -165,6 +165,7 @@ export default function ProfileScreen() {
               <Text style={[styles.statusText, { color: statusMeta.textColor }]}>
                 {statusMeta.label}
               </Text>
+              <Text style={styles.statusHint}>แตะเพื่อเปลี่ยน</Text>
             </Pressable>
           </View>
         </View>
@@ -367,6 +368,12 @@ const styles = StyleSheet.create({
   statusText: {
     fontSize: 16,
     fontWeight: '900',
+  },
+  statusHint: {
+    fontSize: 14,
+    fontWeight: '900',
+    color: WarmClearTheme.colors.textSub,
+    marginLeft: 4,
   },
   metricsRow: {
     marginTop: -36,

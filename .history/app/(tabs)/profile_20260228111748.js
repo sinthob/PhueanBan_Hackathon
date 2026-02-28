@@ -165,6 +165,7 @@ export default function ProfileScreen() {
               <Text style={[styles.statusText, { color: statusMeta.textColor }]}>
                 {statusMeta.label}
               </Text>
+              <Text style={styles.statusHint}>แตะเพื่อเปลี่ยน</Text>
             </Pressable>
           </View>
         </View>
@@ -368,6 +369,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '900',
   },
+  statusHint: {
+    fontSize: 14,
+    fontWeight: '900',
+    color: WarmClearTheme.colors.textSub,
+    marginLeft: 4,
+  },
   metricsRow: {
     marginTop: -36,
     flexDirection: 'row',
@@ -490,6 +497,22 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '900',
     color: WarmClearTheme.colors.surface,
+  },
+    alignItems: 'center',
+    gap: 12,
+    minHeight: 56,
+    paddingHorizontal: 14,
+    borderRadius: WarmClearTheme.radii.control,
+    backgroundColor: WarmClearTheme.colors.surfaceSoft,
+    borderWidth: 1,
+    borderColor: WarmClearTheme.colors.border,
+    marginTop: 12,
+    ...WarmClearTheme.shadows.subtle,
+  },
+  quickActionText: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: WarmClearTheme.colors.text,
   },
   linkButtonLarge: {
     paddingHorizontal: 14,

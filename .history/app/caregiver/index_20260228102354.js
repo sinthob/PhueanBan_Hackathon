@@ -174,7 +174,7 @@ export default function CaregiverDashboardScreen() {
           <Text style={styles.cardTitle}>สัญญาณเพื่อความปลอดภัย</Text>
         </View>
         <Text style={styles.cardBody}>
-          AI/ระบบจะแสดงเป็น “สัญญาณรวม” เพื่อช่วยสังเกต ไม่ใช่ข้อสรุปทางการแพทย์
+          AI/ระบบจะแสดงเป็น "สัญญาณรวม" เพื่อช่วยสังเกต ไม่ใช่ข้อสรุปทางการแพทย์
         </Text>
 
         <View style={styles.signalList}>
